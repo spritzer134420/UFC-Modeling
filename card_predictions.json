@@ -33,7 +33,8 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "live_odds": false
       },
       {
         "fighter1": "Joshua Van",
@@ -52,7 +53,8 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "live_odds": false
       },
       {
         "fighter1": "Alexander Volkov",
@@ -71,7 +73,8 @@
         "within_cap": true,
         "verdict": "BET",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "live_odds": false
       },
       {
         "fighter1": "Sean Brady",
@@ -90,7 +93,8 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "live_odds": false
       },
       {
         "fighter1": "King Green",
@@ -109,7 +113,8 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "live_odds": false
       },
       {
         "fighter1": "Joel Alvarez",
@@ -128,7 +133,8 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       },
       {
         "fighter1": "Grant Dawson",
@@ -147,7 +153,8 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       },
       {
         "fighter1": "Jim Miller",
@@ -166,7 +173,8 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       },
       {
         "fighter1": "Roman Kopylov",
@@ -185,7 +193,8 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       },
       {
         "fighter1": "Pat Sabatini",
@@ -204,7 +213,8 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       },
       {
         "fighter1": "Baisangur Susurkaev",
@@ -223,7 +233,8 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       },
       {
         "fighter1": "Clayton Carpenter",
@@ -242,7 +253,8 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       },
       {
         "fighter1": "Ateba Gautier",
@@ -261,8 +273,10 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": true,
-        "main_card": false
+        "main_card": false,
+        "live_odds": false
       }
-    ]
+    ],
+    "odds_refreshed_at": "2026-05-06T23:05:01.703689Z"
   }
 ]
