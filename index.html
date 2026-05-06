@@ -63,6 +63,9 @@
     .pill-bet-fav { background: var(--blue-bg); color: var(--blue); border: 0.5px solid rgba(96,165,250,0.3); }
     .pill-cap { background: var(--amber-bg); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
     .pill-pass { background: transparent; color: var(--text3); border: 0.5px solid var(--border); }
+    .pill-pending { background: rgba(251,191,36,0.1); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
+    .pending-banner { background: rgba(251,191,36,0.08); border: 0.5px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 10px 16px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--amber); }
+    .pending-banner strong { font-weight: 600; }
     .edge-strip { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 0.5px solid var(--border); }
     .edge-cell { padding: 8px 16px; }
     .edge-cell:not(:last-child) { border-right: 0.5px solid var(--border); }
@@ -162,6 +165,9 @@
     }
 
     function recalc(f) {
+      if (f.predictions_pending || f.prob1 === null || f.prob1 === undefined) {
+        return { pending: true, m1: imp(f.odds1)*100, m2: imp(f.odds2)*100 };
+      }
       const m1 = imp(f.odds1)*100, m2 = imp(f.odds2)*100;
       const e1 = f.prob1 - m1, e2 = f.prob2 - m2;
       let bet_on = null, bet_odds = null, verdict = 'PASS';
@@ -242,55 +248,66 @@
 
     function fightHTML(f, gi) {
       const c = recalc(f);
-      const p1col = f.prob1 >= 50 ? '#60a5fa' : '#555';
-      const p2col = f.prob2 >= 50 ? '#60a5fa' : '#555';
-      const e1cls = c.e1 > 0 ? 'green' : 'red';
-      const e2cls = c.e2 > 0 ? 'green' : 'red';
+      const pending = c.pending;
+      const p1col = pending ? '#555' : (f.prob1 >= 50 ? '#60a5fa' : '#555');
+      const p2col = pending ? '#555' : (f.prob2 >= 50 ? '#60a5fa' : '#555');
+      const e1cls = pending ? '' : (c.e1 > 0 ? 'green' : 'red');
+      const e2cls = pending ? '' : (c.e2 > 0 ? 'green' : 'red');
 
       let pill = 'PASS', pillCls = 'pill-pass';
-      if (c.verdict === 'BET') {
+      if (pending) {
+        pillCls = 'pill-pending'; pill = 'predictions pending';
+      } else if (c.verdict === 'BET') {
         pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog';
         pill = `BET ${c.bet_on.split(' ').pop()} (${oddsStr(c.bet_odds)})`;
       } else if (c.verdict === 'PASS_CAP') {
         pillCls = 'pill-cap'; pill = 'edge · outside cap';
       }
 
+      const prob1Display = pending ? '—' : f.prob1 + '%';
+      const prob2Display = pending ? '—' : f.prob2 + '%';
+      const barWidth = pending ? 50 : f.prob1;
+      const e1Display = pending ? '—' : (c.e1 > 0 ? '+' : '') + c.e1.toFixed(1) + '%';
+      const e2Display = pending ? '—' : (c.e2 > 0 ? '+' : '') + c.e2.toFixed(1) + '%';
+      const ev1Display = pending ? '—' : evStr(f.prob1, f.odds1);
+      const ev2Display = pending ? '—' : evStr(f.prob2, f.odds2);
+
       return `<div class="fight" id="fight-${gi}">
         <div class="fight-main">
           <div class="fighter">
             <span class="fighter-name">${f.fighter1}</span>
             <span class="fighter-odds" id="d-o1-${gi}">${oddsStr(f.odds1)}</span>
-            <span class="fighter-prob-model" style="color:${p1col}">${f.prob1}% model</span>
+            <span class="fighter-prob-model" style="color:${p1col}">${prob1Display} model</span>
             <span class="fighter-prob-mkt">${c.m1.toFixed(0)}% market</span>
           </div>
           <div class="fight-center">
             <span class="weight-class">${f.weight_class}</span>
-            <div class="bar"><div class="bar-fill" style="width:${f.prob1}%;background:${p1col}"></div></div>
+            <div class="bar"><div class="bar-fill" style="width:${barWidth}%;background:${p1col}"></div></div>
             <span class="verdict-pill ${pillCls}">${pill}</span>
           </div>
           <div class="fighter right">
             <span class="fighter-name">${f.fighter2}</span>
             <span class="fighter-odds" id="d-o2-${gi}">${oddsStr(f.odds2)}</span>
-            <span class="fighter-prob-model" style="color:${p2col}">${f.prob2}% model</span>
+            <span class="fighter-prob-model" style="color:${p2col}">${prob2Display} model</span>
             <span class="fighter-prob-mkt">${c.m2.toFixed(0)}% market</span>
           </div>
         </div>
         <div class="edge-strip">
           <div class="edge-cell">
             <div class="edge-label">${f.fighter1.split(' ').pop()} edge</div>
-            <div class="edge-val ${e1cls}">${c.e1 > 0 ? '+' : ''}${c.e1.toFixed(1)}%</div>
+            <div class="edge-val ${e1cls}">${e1Display}</div>
           </div>
           <div class="edge-cell">
             <div class="edge-label">${f.fighter1.split(' ').pop()} EV</div>
-            <div class="edge-val ${e1cls}">${evStr(f.prob1, f.odds1)}</div>
+            <div class="edge-val ${e1cls}">${ev1Display}</div>
           </div>
           <div class="edge-cell">
             <div class="edge-label">${f.fighter2.split(' ').pop()} edge</div>
-            <div class="edge-val ${e2cls}">${c.e2 > 0 ? '+' : ''}${c.e2.toFixed(1)}%</div>
+            <div class="edge-val ${e2cls}">${e2Display}</div>
           </div>
           <div class="edge-cell">
             <div class="edge-label">${f.fighter2.split(' ').pop()} EV</div>
-            <div class="edge-val ${e2cls}">${evStr(f.prob2, f.odds2)}</div>
+            <div class="edge-val ${e2cls}">${ev2Display}</div>
           </div>
         </div>
         <button class="edit-toggle" onclick="toggleEdit(${gi})">edit odds ↓</button>
@@ -309,11 +326,18 @@
       const main = state.filter(f => f.main_card !== false);
       const pre  = state.filter(f => f.main_card === false);
       let bets = state.filter(f => recalc(f).verdict === 'BET').length;
+      const isPending = state.some(f => f.predictions_pending || f.prob1 === null || f.prob1 === undefined);
 
       let html = `<div class="event-header">
         <span class="event-name">${currentEvent}</span>
         <span class="event-meta">${currentDate}</span>
       </div>`;
+
+      if (isPending) {
+        html += `<div class="pending-banner">
+          ⚠ <span><strong>Model predictions pending.</strong> Odds are live but model probabilities haven't been run yet. Run <code>weekly_update.bat</code> to generate predictions.</span>
+        </div>`;
+      }
 
       if (main.length > 0) {
         html += `<div class="card"><div class="section-label">Main card</div>`;
