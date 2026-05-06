@@ -1,0 +1,115 @@
+name: Refresh UFC Odds
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # 9 AM ET daily (13:00 UTC)
+    - cron: '0 19 * * *'   # 3 PM ET daily (19:00 UTC)
+  workflow_dispatch:         # also allows manual trigger from GitHub UI
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch live odds and update JSON
+        env:
+          SHARP_API_KEY: ${{ secrets.SHARP_API_KEY }}
+        run: |
+          python - <<'EOF'
+          import json, time, requests, os
+          from datetime import datetime
+          from pathlib import Path
+
+          SHARP_API_KEY = os.environ["SHARP_API_KEY"]
+          SHARP_BASE    = "https://api.sharpapi.io/api/v1"
+          PREDICTIONS   = Path("card_predictions.json")
+
+          headers = {"X-API-Key": SHARP_API_KEY}
+          odds_map = {}
+
+          # Fetch events
+          r = requests.get(f"{SHARP_BASE}/events",
+                           params={"sport":"mma","league":"ufc","limit":50},
+                           headers=headers, timeout=10)
+          print(f"Events status: {r.status_code}")
+          if r.ok:
+              events = r.json().get("data", [])
+              print(f"Found {len(events)} UFC events")
+              for ev in events[:25]:
+                  try:
+                      r2 = requests.get(
+                          f"{SHARP_BASE}/events/{ev['id']}/odds",
+                          params={"market":"moneyline","odds_format":"american"},
+                          headers=headers, timeout=10
+                      )
+                      if not r2.ok: continue
+                      outcomes = r2.json().get("data", [])
+                      fighter_odds = {}
+                      for o in outcomes:
+                          name = (o.get("name") or o.get("team") or "").strip()
+                          last = name.split()[-1].lower() if name else ""
+                          price = o.get("odds_american") or o.get("price")
+                          if last and price is not None:
+                              if last not in fighter_odds or float(price) > fighter_odds[last]:
+                                  fighter_odds[last] = float(price)
+                      names = list(fighter_odds.keys())
+                      if len(names) >= 2:
+                          for n1 in names:
+                              for n2 in names:
+                                  if n1 != n2:
+                                      odds_map[(n1,n2)] = (fighter_odds[n1], fighter_odds[n2])
+                      time.sleep(0.5)
+                  except Exception as e:
+                      print(f"  Event error: {e}")
+                      continue
+
+          print(f"Got odds for {len(odds_map)//2} matchups")
+
+          # Update predictions JSON
+          if not PREDICTIONS.exists():
+              print("card_predictions.json not found")
+              exit(0)
+
+          with open(PREDICTIONS) as f:
+              data = json.load(f)
+
+          updated = 0
+          for event in data:
+              for bout in event.get("bouts", []):
+                  l1 = bout["fighter1"].split()[-1].lower()
+                  l2 = bout["fighter2"].split()[-1].lower()
+                  entry = odds_map.get((l1, l2))
+                  if entry:
+                      bout["odds1"] = round(entry[0])
+                      bout["odds2"] = round(entry[1])
+                      bout["live_odds"] = True
+                      bout["odds_updated_at"] = datetime.utcnow().isoformat() + "Z"
+                      updated += 1
+                  else:
+                      bout["live_odds"] = False
+              event["odds_refreshed_at"] = datetime.utcnow().isoformat() + "Z"
+
+          with open(PREDICTIONS, "w") as f:
+              json.dump(data, f, indent=2)
+
+          print(f"Updated {updated} fights with live odds")
+          EOF
+
+      - name: Commit and push updated odds
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add card_predictions.json
+          git diff --staged --quiet || git commit -m "Auto odds refresh $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
