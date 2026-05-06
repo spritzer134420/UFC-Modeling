@@ -1,0 +1,30 @@
+[
+  {
+    "event": "UFC 328: Chimaev vs. Strickland",
+    "date": "May 9, 2026",
+    "generated_at": "2026-05-05T00:00:00",
+    "backtest": {
+      "roi": 33.7,
+      "win_rate": 64.2,
+      "fav_roi": 80.8,
+      "dog_roi": 18.6,
+      "total_bets": 148,
+      "as_of": "2026-05-05"
+    },
+    "bouts": [
+      {"fighter1":"Khamzat Chimaev","fighter2":"Sean Strickland","weight_class":"Middleweight","odds1":-500,"odds2":380,"prob1":58,"prob2":42,"mkt_prob1":83,"mkt_prob2":21,"edge1":-24.7,"edge2":20.7,"bet_on":"Sean Strickland","bet_odds":380,"within_cap":false,"verdict":"PASS_CAP","main_card":true},
+      {"fighter1":"Joshua Van","fighter2":"Tatsuro Taira","weight_class":"Flyweight","odds1":155,"odds2":-190,"prob1":38,"prob2":62,"mkt_prob1":39,"mkt_prob2":66,"edge1":-1.2,"edge2":0.8,"bet_on":null,"bet_odds":null,"within_cap":false,"verdict":"PASS","main_card":true},
+      {"fighter1":"Alexander Volkov","fighter2":"Waldo Cortes Acosta","weight_class":"Heavyweight","odds1":-180,"odds2":150,"prob1":52,"prob2":48,"mkt_prob1":64,"mkt_prob2":40,"edge1":-12.3,"edge2":8.3,"bet_on":"Waldo Cortes Acosta","bet_odds":150,"within_cap":true,"verdict":"BET","main_card":true},
+      {"fighter1":"Sean Brady","fighter2":"Joaquin Buckley","weight_class":"Welterweight","odds1":-185,"odds2":155,"prob1":45,"prob2":55,"mkt_prob1":65,"mkt_prob2":39,"edge1":-19.6,"edge2":15.8,"bet_on":"Joaquin Buckley","bet_odds":155,"within_cap":false,"verdict":"PASS_CAP","main_card":true},
+      {"fighter1":"King Green","fighter2":"Jeremy Stephens","weight_class":"Lightweight","odds1":-310,"odds2":250,"prob1":53,"prob2":47,"mkt_prob1":76,"mkt_prob2":29,"edge1":-22.6,"edge2":18.9,"bet_on":"Jeremy Stephens","bet_odds":250,"within_cap":false,"verdict":"PASS_CAP","main_card":true},
+      {"fighter1":"Joel Alvarez","fighter2":"Yaroslav Amosov","weight_class":"Welterweight","odds1":140,"odds2":-170,"prob1":38,"prob2":62,"mkt_prob1":42,"mkt_prob2":63,"edge1":-1.0,"edge2":1.4,"bet_on":null,"bet_odds":null,"within_cap":false,"verdict":"PASS","main_card":false},
+      {"fighter1":"Grant Dawson","fighter2":"Mateusz Rebecki","weight_class":"Lightweight","odds1":-140,"odds2":118,"prob1":57,"prob2":43,"mkt_prob1":58,"mkt_prob2":46,"edge1":-1.1,"edge2":1.1,"bet_on":null,"bet_odds":null,"within_cap":false,"verdict":"PASS","main_card":false},
+      {"fighter1":"Jim Miller","fighter2":"Jared Gordon","weight_class":"Lightweight","odds1":250,"odds2":-320,"prob1":25,"prob2":75,"mkt_prob1":29,"mkt_prob2":76,"edge1":-1.1,"edge2":1.1,"bet_on":null,"bet_odds":null,"within_cap":false,"verdict":"PASS","main_card":false},
+      {"fighter1":"Roman Kopylov","fighter2":"Marco Tulio","weight_class":"Middleweight","odds1":155,"odds2":-190,"prob1":41,"prob2":59,"mkt_prob1":39,"mkt_prob2":66,"edge1":1.4,"edge2":-6.7,"bet_on":"Roman Kopylov","bet_odds":155,"within_cap":false,"verdict":"PASS_CAP","main_card":false},
+      {"fighter1":"Pat Sabatini","fighter2":"William Gomis","weight_class":"Featherweight","odds1":-200,"odds2":168,"prob1":49,"prob2":51,"mkt_prob1":67,"mkt_prob2":37,"edge1":-17.6,"edge2":13.2,"bet_on":"William Gomis","bet_odds":168,"within_cap":false,"verdict":"PASS_CAP","main_card":false},
+      {"fighter1":"Baisangur Susurkaev","fighter2":"Djorden Santos","weight_class":"Lightweight","odds1":-650,"odds2":475,"prob1":86,"prob2":14,"mkt_prob1":87,"mkt_prob2":17,"edge1":-1.0,"edge2":0.3,"bet_on":null,"bet_odds":null,"within_cap":false,"verdict":"PASS","main_card":false},
+      {"fighter1":"Clayton Carpenter","fighter2":"Jose Ochoa","weight_class":"Heavyweight","odds1":140,"odds2":-170,"prob1":40,"prob2":60,"mkt_prob1":42,"mkt_prob2":63,"edge1":-1.2,"edge2":1.2,"bet_on":null,"bet_odds":null,"within_cap":false,"verdict":"PASS","main_card":false},
+      {"fighter1":"Ateba Gautier","fighter2":"Ozzy Diaz","weight_class":"Lightweight","odds1":-1000,"odds2":650,"prob1":88,"prob2":12,"mkt_prob1":91,"mkt_prob2":13,"edge1":-0.9,"edge2":0.9,"bet_on":null,"bet_odds":null,"within_cap":false,"verdict":"PASS","main_card":false}
+    ]
+  }
+]
