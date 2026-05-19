@@ -173,7 +173,8 @@
       let bet_on = null, bet_odds = null, verdict = 'PASS';
       if (e1 >= e2 && e1 > 0) { bet_on = f.fighter1; bet_odds = f.odds1; }
       else if (e2 > 0) { bet_on = f.fighter2; bet_odds = f.odds2; }
-      if (bet_on && Math.abs(bet_odds) <= 150) verdict = 'BET';
+      if (f.verdict) { verdict = f.verdict; if (f.bet_on) bet_on = f.bet_on; if (f.bet_odds) bet_odds = f.bet_odds; }
+      else if (bet_on && Math.abs(bet_odds) <= 150) verdict = 'BET';
       else if (bet_on) verdict = 'PASS_CAP';
       return { m1, m2, e1, e2, bet_on, bet_odds, verdict };
     }
