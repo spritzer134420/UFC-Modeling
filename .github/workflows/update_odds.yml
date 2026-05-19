@@ -1,0 +1,32 @@
+name: Update UFC Odds
+
+on:
+  schedule:
+    - cron: '0 14 * * *'
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-odds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Update odds and recalculate verdicts
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python update_odds.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add card_predictions.json
+          git diff --staged --quiet || git commit -m "Auto: refresh DraftKings odds $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
