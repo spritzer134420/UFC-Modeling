@@ -99,6 +99,16 @@
       .edge-strip { grid-template-columns: repeat(2, 1fr); }
       .edge-cell:nth-child(2) { border-right: none; }
     }
+
+    .parlay-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-top: 4px; }
+    .parlay-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .parlay-tag { background: rgba(251,191,36,0.15); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); border-radius: 99px; font-size: 10px; padding: 2px 8px; }
+    .parlay-legs { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .parlay-leg { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+    .parlay-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 0.5px solid var(--border); padding-top: 10px; }
+    .parlay-stat-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+    .parlay-stat-val { font-size: 13px; font-weight: 700; color: var(--green); }
+    .parlay-disclaimer { font-size: 10px; color: var(--text3); margin-top: 8px; text-align: center; }
   </style>
 </head>
 <body>
@@ -106,7 +116,7 @@
     <div class="header">
       <div>
         <h1>UFC Edge Analyzer</h1>
-        <div class="header-sub">+150 cap · model vs market · updated weekly</div>
+        <div class="header-sub">4% edge · model vs market · updated weekly</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span class="live-badge" id="live-badge" style="display:none"><span class="live-dot"></span>live odds</span>
@@ -118,7 +128,7 @@
       <div class="stat">
         <div class="stat-label">Backtest ROI</div>
         <div class="stat-value green" id="s-roi">—</div>
-        <div class="stat-sub">+150 cap · closing lines</div>
+        <div class="stat-sub">>=4% edge · opening lines</div>
       </div>
       <div class="stat">
         <div class="stat-label">Win rate</div>
@@ -128,12 +138,12 @@
       <div class="stat">
         <div class="stat-label">Fav ROI</div>
         <div class="stat-value green" id="s-fav">—</div>
-        <div class="stat-sub">-101 to -150</div>
+        <div class="stat-sub">favs within cap</div>
       </div>
       <div class="stat">
         <div class="stat-label">Dog ROI</div>
         <div class="stat-value green" id="s-dog">—</div>
-        <div class="stat-sub">+101 to +150</div>
+        <div class="stat-sub">dogs within cap</div>
       </div>
     </div>
 
@@ -147,8 +157,8 @@
 
   <script>
     const PREDICTIONS_URL = 'card_predictions.json';
-    const SHARP_API_KEY = 'sk_live_8dUNsxEoiEcguLHHPPAAss';
-    const SHARP_BASE = 'https://api.sharpapi.io/api/v1';
+    const ODDS_API_KEY = '607a8a2924939354eaa7515d34ac762e';
+    const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
 
     let state = [];
     let currentEvent = '';
@@ -191,60 +201,35 @@
 
     async function fetchLiveOdds() {
       try {
-        // Step 1: get upcoming UFC events
-        const evRes = await fetch(
-          `${SHARP_BASE}/events?sport=mma&league=ufc&limit=50`,
-          { headers: { 'X-API-Key': SHARP_API_KEY } }
+        const res = await fetch(
+          `${ODDS_API_BASE}/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h&oddsFormat=american&bookmakers=draftkings&apiKey=${ODDS_API_KEY}`
         );
-        if (!evRes.ok) return;
-        const evData = await evRes.json();
-        const events = evData.data || [];
-        if (!events.length) return;
-
-        // Step 2: get best odds for each event
+        if (!res.ok) { console.log('OddsAPI failed:', res.status); return; }
+        const games = await res.json();
+        if (!games.length) return;
         const map = {};
-        for (const ev of events) {
-          try {
-            const oddsRes = await fetch(
-              `${SHARP_BASE}/events/${ev.id}/odds?market=moneyline&odds_format=american`,
-              { headers: { 'X-API-Key': SHARP_API_KEY } }
-            );
-            if (!oddsRes.ok) continue;
-            const oddsData = await oddsRes.json();
-            const outcomes = (oddsData.data || []);
-
-            // Find best price for each fighter
-            const fighters = {};
-            outcomes.forEach(o => {
-              const name = (o.name || o.team || '').split(' ').pop().toLowerCase();
-              if (!fighters[name] || o.odds_american > fighters[name]) {
-                fighters[name] = o.odds_american;
-              }
-            });
-
-            const names = Object.keys(fighters);
-            if (names.length >= 2) {
-              const f1 = names[0], f2 = names[1];
-              map[`${f1}|${f2}`] = { o1: fighters[f1], o2: fighters[f2] };
-              map[`${f2}|${f1}`] = { o1: fighters[f2], o2: fighters[f1] };
-            }
-          } catch(e) { continue; }
-        }
-
+        games.forEach(game => {
+          const dk = (game.bookmakers || []).find(b => b.key === 'draftkings');
+          if (!dk) return;
+          const market = (dk.markets || []).find(m => m.key === 'h2h');
+          if (!market || market.outcomes.length < 2) return;
+          const o = market.outcomes;
+          const n1 = o[0].name.split(' ').pop().toLowerCase();
+          const n2 = o[1].name.split(' ').pop().toLowerCase();
+          map[`${n1}|${n2}`] = { o1: o[0].price, o2: o[1].price };
+          map[`${n2}|${n1}`] = { o1: o[1].price, o2: o[0].price };
+        });
         liveOdds = map;
         if (Object.keys(map).length > 0) {
           document.getElementById('live-badge').style.display = 'inline-flex';
+          let updated = 0;
           state.forEach(f => {
             const key = f.fighter1.split(' ').pop().toLowerCase() + '|' + f.fighter2.split(' ').pop().toLowerCase();
-            if (liveOdds[key]) {
-              f.odds1 = liveOdds[key].o1;
-              f.odds2 = liveOdds[key].o2;
-            }
+            if (liveOdds[key]) { f.odds1 = liveOdds[key].o1; f.odds2 = liveOdds[key].o2; updated++; }
           });
+          console.log(`Live odds updated for ${updated} fights`);
         }
-      } catch(e) {
-        console.log('SharpAPI unavailable:', e.message);
-      }
+      } catch(e) { console.log('OddsAPI unavailable:', e.message); }
     }
 
     function fightHTML(f, gi) {
@@ -322,6 +307,29 @@
       </div>`;
     }
 
+
+    function buildParlay() {
+      var legs = [];
+      state.forEach(function(f) {
+        var c = recalc(f);
+        if (c.verdict !== 'BET' || !c.bet_on || !c.bet_odds) return;
+        var betProb = c.bet_on === f.fighter1 ? f.prob1 : f.prob2;
+        if (betProb < 51) return;
+        legs.push({ fullName: c.bet_on, odds: c.bet_odds, prob: betProb });
+      });
+      if (legs.length < 2) return '';
+      var parlayDecimal = 1.0, combinedProb = 1.0;
+      legs.forEach(function(leg) {
+        parlayDecimal *= leg.odds > 0 ? (leg.odds/100+1) : (100/Math.abs(leg.odds)+1);
+        combinedProb *= leg.prob/100;
+      });
+      var pa = parlayDecimal >= 2 ? '+'+Math.round((parlayDecimal-1)*100) : '-'+Math.round(100/(parlayDecimal-1));
+      var lh = legs.map(function(l) {
+        return '<div class="parlay-leg"><span style="font-weight:600">'+l.fullName+'</span><span style="color:var(--green);font-weight:600">'+oddsStr(l.odds)+'</span></div>';
+      }).join('');
+      return '<div class="parlay-box"><div class="parlay-title">Parlay of the Week <span class="parlay-tag">HIGH RISK</span></div><div class="parlay-legs">'+lh+'</div><div class="parlay-stats"><div><div class="parlay-stat-label">Legs</div><div class="parlay-stat-val">'+legs.length+'</div></div><div><div class="parlay-stat-label">Parlay odds</div><div class="parlay-stat-val">'+pa+'</div></div><div><div class="parlay-stat-label">Hit prob</div><div class="parlay-stat-val">'+(combinedProb*100).toFixed(1)+'%</div></div></div><div class="parlay-disclaimer">Model-based · not financial advice</div></div>';
+    }
+
     function drawCard() {
       const root = document.getElementById('root');
       const main = state.filter(f => f.main_card !== false);
@@ -352,11 +360,12 @@
       }
 
       html += `<div class="footer-note">
-        <strong>${bets} bet${bets !== 1 ? 's' : ''} flagged</strong> within -150/+150 cap this card ·
+        <strong>${bets} bet${bets !== 1 ? 's' : ''} flagged</strong> flagged this card (>=4% edge) ·
         ${currentBacktest.total_bets || 148} historical bets in backtest ·
         click <em>edit odds</em> on any fight to enter your own lines
       </div>`;
 
+      var ph = buildParlay(); if (ph) html += ph;
       root.innerHTML = html;
     }
 
