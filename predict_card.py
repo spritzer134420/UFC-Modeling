@@ -137,7 +137,7 @@ def calc_live_backtest(model, feat_cols, df, conn):
             continue
 
         is_dog = bet_odds > 0
-        within_cap = (abs(bet_odds) <= 150) or (is_dog and 151 <= bet_odds <= 200)
+        within_cap = (-200 <= bet_odds <= -101) or (is_dog and 101 <= bet_odds <= 200)
         if not within_cap:
             continue
 
