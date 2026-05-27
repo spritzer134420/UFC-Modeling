@@ -235,8 +235,7 @@
         if (Object.keys(map).length > 0) {
           document.getElementById('live-badge').style.display = 'inline-flex';
           let updated = 0;
-          if (data.last_updated) { var ts=new Date(data.last_updated); var el=document.getElementById('last-updated'); if(el) el.textContent='Odds updated '+ts.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
-        state.forEach(f => {
+          state.forEach(f => {
             const key = f.fighter1.split(' ').pop().toLowerCase() + '|' + f.fighter2.split(' ').pop().toLowerCase();
             if (liveOdds[key]) { f.odds1 = liveOdds[key].o1; f.odds2 = liveOdds[key].o2; updated++; }
           });
