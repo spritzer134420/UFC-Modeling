@@ -64,6 +64,9 @@
     .pill-cap { background: var(--amber-bg); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
     .pill-disagree { background: rgba(251,191,36,0.15); color: #f59e0b; border: 0.5px solid rgba(251,191,36,0.4); }
     .pill-intrigued { background: rgba(234,179,8,0.10); color: #ca8a04; border: 0.5px solid rgba(234,179,8,0.3); }
+    .fight-info-panel { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 4px; font-size: 12px; color: var(--text2); line-height: 1.6; display: none; }
+    .fight-info-bottom { margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text3); }
+    .info-btn { background: none; border: none; color: var(--text3); font-size: 11px; cursor: pointer; padding: 2px 6px; vertical-align: middle; }
     .pill-pass { background: transparent; color: var(--text3); border: 0.5px solid var(--border); }
     .pill-pending { background: rgba(251,191,36,0.1); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
     .pending-banner { background: rgba(251,191,36,0.08); border: 0.5px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 10px 16px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--amber); }
@@ -404,7 +407,39 @@
         panel.innerHTML = '<div style="color:var(--text3)">Analysis unavailable.</div>';
       }
     }
-    function drawCard() {
+    var infoCache = {};
+function toggleInfo(i) {
+  var p = document.getElementById("ip-"+i);
+  if (!p) return;
+  if (p.style.display === "block") { p.style.display = "none"; return; }
+  p.style.display = "block";
+  if (infoCache[i]) { p.innerHTML = infoCache[i]; return; }
+  p.innerHTML = "<em>Generating analysis...</em>";
+  var f = state[i];
+  var c = recalc(f);
+  var betOn = c.bet_on || f.fighter1;
+  var opp = betOn === f.fighter1 ? f.fighter2 : f.fighter1;
+  var betProb = betOn === f.fighter1 ? f.prob1 : f.prob2;
+  var imp1 = f.odds1 < 0 ? Math.abs(f.odds1)/(Math.abs(f.odds1)+100) : 100/(f.odds1+100);
+  var imp2 = f.odds2 < 0 ? Math.abs(f.odds2)/(Math.abs(f.odds2)+100) : 100/(f.odds2+100);
+  var mktProb = Math.round((betOn===f.fighter1 ? imp1 : imp2)*100);
+  var betOdds = c.bet_odds || 0;
+  var sweetSpot = "";
+  if (c.verdict==="BET" && betOdds > 200 && c.edge >= 0.25) { var mn=Math.max(200,Math.round(100/Math.max(betProb/100-0.25,0.01)-100)); sweetSpot = "+"+mn+" to +600"; }
+  else if (c.verdict==="BET" && betOdds < 0) { var mx=Math.max(-200,-Math.round((betProb/100-0.04)/(1-(betProb/100-0.04))*100)); sweetSpot = "-101 to "+mx; }
+  else if (c.verdict==="BET") { sweetSpot = "+101 to +200"; }
+  var prompt = "Write 2-3 sentences about why " + betOn + " is interesting in this UFC fight against " + opp + ". Focus on fighter attributes: style, experience, finishing ability, recent form. Do not mention odds or betting.";
+  fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 200, messages: [{ role: "user", content: prompt }] }) })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    var analysis = d.content && d.content[0] ? d.content[0].text : "Analysis unavailable.";
+    var openOdds = betOdds > 0 ? "+"+betOdds : String(betOdds);
+    var bottom = "Based on opening odds of "+openOdds+" — model gives "+betOn+" "+betProb+"% vs market's "+mktProb+"%."+(sweetSpot ? " Model likes this between "+sweetSpot+"." : "");
+    var html = "<div>"+analysis+"</div><div class='fight-info-bottom'>"+bottom+"</div>";
+    infoCache[i] = html; p.innerHTML = html;
+  }).catch(function() { p.innerHTML = "<em>Analysis unavailable.</em>"; });
+}
+function drawCard() {
       const root = document.getElementById('root');
       const main = state.filter(f => f.main_card !== false);
       const pre  = state.filter(f => f.main_card === false);
