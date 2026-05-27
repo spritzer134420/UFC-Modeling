@@ -260,7 +260,7 @@
       if (pending) {
         pillCls = 'pill-pending'; pill = 'predictions pending';
       } else if (c.verdict === 'BET') {
-        if (c.edge >= 0.25 && c.bet_odds > 200) { pillCls = 'pill-disagree'; pill = 'Disrespected Underdog · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); } else { pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog'; pill = 'Model loves it · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); }
+        if (Math.max(c.e1||0, c.e2||0) >= 25 && c.bet_odds > 200) { pillCls = 'pill-disagree'; pill = 'Disrespected Underdog · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); } else { pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog'; pill = 'Model loves it · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); }
       } else if (c.verdict === 'PASS_CAP') {
         pillCls = 'pill-intrigued'; pill = "Model's intrigued";
       } else if (Math.max(c.e1||0, c.e2||0) >= 1.5) {
