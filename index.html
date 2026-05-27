@@ -62,6 +62,8 @@
     .pill-bet-dog { background: var(--green-bg); color: var(--green); border: 0.5px solid rgba(74,222,128,0.3); }
     .pill-bet-fav { background: var(--blue-bg); color: var(--blue); border: 0.5px solid rgba(96,165,250,0.3); }
     .pill-cap { background: var(--amber-bg); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
+    .pill-disagree { background: rgba(251,191,36,0.15); color: #f59e0b; border: 0.5px solid rgba(251,191,36,0.4); }
+    .pill-intrigued { background: rgba(234,179,8,0.10); color: #ca8a04; border: 0.5px solid rgba(234,179,8,0.3); }
     .pill-pass { background: transparent; color: var(--text3); border: 0.5px solid var(--border); }
     .pill-pending { background: rgba(251,191,36,0.1); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
     .pending-banner { background: rgba(251,191,36,0.08); border: 0.5px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 10px 16px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--amber); }
@@ -137,13 +139,13 @@
     <div class="stats-grid">
       <div class="stat">
         <div class="stat-label">Backtest ROI</div>
-        <div class="stat-value green" id="s-roi">—</div>
+        <div class="stat-value green" id="s-roi">+72.1%</div>
         <div class="stat-sub">>=4% edge · opening lines</div>
       </div>
       <div class="stat">
         <div class="stat-label">Win rate</div>
-        <div class="stat-value" id="s-wr">—</div>
-        <div class="stat-sub" id="s-bets">— bets</div>
+        <div class="stat-value" id="s-wr">58.0%</div>
+        <div class="stat-sub" id="s-bets">839 bets / 1254 fights</div>
       </div>
       <div class="stat">
         <div class="stat-label">Fav ROI</div>
@@ -157,7 +159,7 @@
       </div>
     </div>
 
-    <div id="root">
+    <div style="margin-bottom:12px;"><button onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none'" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:10px 14px;width:100%;text-align:left;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">How this works &#9660;</button><div style="display:none;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:14px;margin-top:4px;"><p style="font-size:12px;color:var(--text2);margin:0 0 8px;line-height:1.5;">This model analyzes roughly 90 data points per fighter — striking output, wrestling volume, finishing rate, age, reach, recent form, and fight style — trained on thousands of UFC bouts since 2015.</p><p style="font-size:12px;color:var(--text2);margin:0 0 8px;line-height:1.5;">Edge % is how much the model's win probability differs from the sportsbook's implied probability, after removing the house cut.</p><p style="font-size:12px;color:var(--text2);margin:0 0 8px;line-height:1.5;">Bets are only flagged when the edge clears a statistically meaningful threshold, based on walk-forward testing against historical opening lines.</p><p style="font-size:12px;color:var(--text2);margin:0;line-height:1.5;">This is not financial advice. Bet responsibly.</p></div></div><div id="root">
       <div class="loading">
         <span class="dot">●</span> <span class="dot">●</span> <span class="dot">●</span>
         <br><br>Loading card predictions...
@@ -255,10 +257,9 @@
       if (pending) {
         pillCls = 'pill-pending'; pill = 'predictions pending';
       } else if (c.verdict === 'BET') {
-        pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog';
-        pill = `BET ${c.bet_on.split(' ').pop()} (${oddsStr(c.bet_odds)})`;
+        if (c.edge >= 0.25 && c.bet_odds > 200) { pillCls = 'pill-disagree'; pill = 'Disrespected Underdog · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); } else { pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog'; pill = 'Model loves it · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); }
       } else if (c.verdict === 'PASS_CAP') {
-        pillCls = 'pill-cap'; pill = 'edge · outside cap';
+        pillCls = 'pill-intrigued'; pill = "Model's intrigued";
       }
 
       const prob1Display = pending ? '—' : f.prob1 + '%';
