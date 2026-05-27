@@ -62,6 +62,8 @@
     .pill-bet-dog { background: var(--green-bg); color: var(--green); border: 0.5px solid rgba(74,222,128,0.3); }
     .pill-bet-fav { background: var(--blue-bg); color: var(--blue); border: 0.5px solid rgba(96,165,250,0.3); }
     .pill-cap { background: var(--amber-bg); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
+    .pill-disagree { background: rgba(251,191,36,0.15); color: #f59e0b; border: 0.5px solid rgba(251,191,36,0.4); }
+    .pill-intrigued { background: rgba(234,179,8,0.10); color: #ca8a04; border: 0.5px solid rgba(234,179,8,0.3); }
     .pill-pass { background: transparent; color: var(--text3); border: 0.5px solid var(--border); }
     .pill-pending { background: rgba(251,191,36,0.1); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
     .pending-banner { background: rgba(251,191,36,0.08); border: 0.5px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 10px 16px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--amber); }
@@ -129,7 +131,7 @@
         <div class="header-sub">4% edge · model vs market · Cards added as they come out</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <span class="live-badge" id="live-badge" style="display:none"><span class="live-dot"></span>live odds</span>
+        <span id="last-updated" style="font-size:11px;color:var(--text3);margin-right:6px;"></span><span class="live-badge" id="live-badge" style="display:none"><span class="live-dot"></span>live odds</span>
         <button class="refresh-btn" onclick="loadAll()">↻ refresh</button>
       </div>
     </div>
@@ -137,13 +139,13 @@
     <div class="stats-grid">
       <div class="stat">
         <div class="stat-label">Backtest ROI</div>
-        <div class="stat-value green" id="s-roi">—</div>
+        <div class="stat-value green" id="s-roi">+72.1%</div>
         <div class="stat-sub">>=4% edge · opening lines</div>
       </div>
       <div class="stat">
         <div class="stat-label">Win rate</div>
-        <div class="stat-value" id="s-wr">—</div>
-        <div class="stat-sub" id="s-bets">— bets</div>
+        <div class="stat-value" id="s-wr">58.0%</div>
+        <div class="stat-sub" id="s-bets">839 bets / 1254 fights</div>
       </div>
       <div class="stat">
         <div class="stat-label">Fav ROI</div>
@@ -190,7 +192,7 @@
       }
       const m1 = imp(f.odds1)*100, m2 = imp(f.odds2)*100;
       const e1 = f.prob1 - m1, e2 = f.prob2 - m2;
-      let bet_on = null, bet_odds = null, verdict = 'PASS';
+      let bet_on = null, bet_odds = null, verdict = 'PASS'; // model not feeling it
       if (e1 >= e2 && e1 > 0) { bet_on = f.fighter1; bet_odds = f.odds1; }
       else if (e2 > 0) { bet_on = f.fighter2; bet_odds = f.odds2; }
       if (f.verdict) { verdict = f.verdict; bet_on = f.bet_on || bet_on; bet_odds = f.bet_odds || bet_odds; }
@@ -233,7 +235,8 @@
         if (Object.keys(map).length > 0) {
           document.getElementById('live-badge').style.display = 'inline-flex';
           let updated = 0;
-          state.forEach(f => {
+          if (data.last_updated) { var ts=new Date(data.last_updated); var el=document.getElementById('last-updated'); if(el) el.textContent='Odds updated '+ts.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+        state.forEach(f => {
             const key = f.fighter1.split(' ').pop().toLowerCase() + '|' + f.fighter2.split(' ').pop().toLowerCase();
             if (liveOdds[key]) { f.odds1 = liveOdds[key].o1; f.odds2 = liveOdds[key].o2; updated++; }
           });
@@ -254,10 +257,11 @@
       if (pending) {
         pillCls = 'pill-pending'; pill = 'predictions pending';
       } else if (c.verdict === 'BET') {
-        pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog';
+        if (c.edge >= 0.25 && c.bet_odds > 200) { pillCls = 'pill-disagree'; pill = 'Disrespected Underdog'; }
+        else { pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog';
         pill = `BET ${c.bet_on.split(' ').pop()} (${oddsStr(c.bet_odds)})`;
       } else if (c.verdict === 'PASS_CAP') {
-        pillCls = 'pill-cap'; pill = 'edge · outside cap';
+        pillCls = 'pill-cap'; pill = "Model's intrigued"; // edge but outside capap';
       }
 
       const prob1Display = pending ? '—' : f.prob1 + '%';
