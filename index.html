@@ -109,6 +109,16 @@
     .parlay-stat-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
     .parlay-stat-val { font-size: 13px; font-weight: 700; color: var(--green); }
     .parlay-disclaimer { font-size: 10px; color: var(--text3); margin-top: 8px; text-align: center; }
+
+    .how-it-works-wrap { margin-bottom: 12px; }
+    .how-it-works-btn { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 14px; width: 100%; text-align: left; color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; }
+    .how-it-works { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; margin-top: 4px; }
+    .how-it-works p { font-size: 12px; color: var(--text2); margin: 0 0 8px 0; line-height: 1.5; }
+    .how-it-works p:last-child { margin-bottom: 0; }
+    .info-btn { background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer; padding: 0 4px; vertical-align: middle; }
+    .info-btn:hover { color: var(--text); }
+    .fight-info-panel { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px; margin-top: 4px; font-size: 12px; color: var(--text2); line-height: 1.5; }
+    .fight-info-bottom { margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text3); }
   </style>
 </head>
 <body>
@@ -116,7 +126,7 @@
     <div class="header">
       <div>
         <h1>UFC Edge Analyzer</h1>
-        <div class="header-sub">4% edge · model vs market · updated weekly</div>
+        <div class="header-sub">4% edge · model vs market · Cards added as they come out</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span class="live-badge" id="live-badge" style="display:none"><span class="live-dot"></span>live odds</span>
@@ -330,6 +340,68 @@
       return '<div class="parlay-box"><div class="parlay-title">Parlay of the Week <span class="parlay-tag">HIGH RISK</span></div><div class="parlay-legs">'+lh+'</div><div class="parlay-stats"><div><div class="parlay-stat-label">Legs</div><div class="parlay-stat-val">'+legs.length+'</div></div><div><div class="parlay-stat-label">Parlay odds</div><div class="parlay-stat-val">'+pa+'</div></div><div><div class="parlay-stat-label">Hit prob</div><div class="parlay-stat-val">'+(combinedProb*100).toFixed(1)+'%</div></div></div><div class="parlay-disclaimer">Model-based · not financial advice</div></div>';
     }
 
+
+    function toggleHowItWorks() {
+      var el = document.getElementById('how-it-works');
+      var arrow = document.getElementById('hiw-arrow');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      arrow.textContent = el.style.display === 'none' ? '▼' : '▲';
+    }
+    function toggleRoiInfo() {
+      var el = document.getElementById('roi-info');
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+    var infoCache = {};
+    function toggleFightInfo(i) {
+      var panel = document.getElementById('info-panel-' + i);
+      if (!panel) return;
+      if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+      panel.style.display = 'block';
+      if (infoCache[i]) { panel.innerHTML = infoCache[i]; return; }
+      var f = state[i];
+      panel.innerHTML = '<div style="color:var(--text3);font-size:11px;">Generating analysis...</div>';
+      generateFightAnalysis(f, i, panel);
+    }
+    async function generateFightAnalysis(f, i, panel) {
+      var c = recalc(f);
+      var betOn = c.bet_on || f.fighter1;
+      var opp = c.bet_on === f.fighter1 ? f.fighter2 : f.fighter1;
+      var betProb = c.bet_on === f.fighter1 ? f.prob1 : f.prob2;
+      var imp1 = f.odds1 < 0 ? Math.abs(f.odds1)/(Math.abs(f.odds1)+100) : 100/(f.odds1+100);
+      var imp2 = f.odds2 < 0 ? Math.abs(f.odds2)/(Math.abs(f.odds2)+100) : 100/(f.odds2+100);
+      var mktProb = Math.round((c.bet_on === f.fighter1 ? imp1 : imp2) * 100);
+      var betOdds = c.bet_odds || 0;
+      var sweetSpot = '';
+      if (c.verdict === 'DISRESPECTED') {
+        var minImplied = betProb/100 - 0.25;
+        var minOdds = minImplied > 0 ? Math.round(100/minImplied - 100) : 200;
+        sweetSpot = '+' + Math.max(200, minOdds) + ' to +600';
+      } else if (c.verdict === 'LOVES' && betOdds < 0) {
+        var maxImplied = betProb/100 - 0.04;
+        var maxOdds = maxImplied > 0 ? -Math.round(maxImplied/(1-maxImplied)*100) : -200;
+        sweetSpot = '-101 to ' + Math.max(-200, maxOdds);
+      } else if (c.verdict === 'LOVES') {
+        sweetSpot = '+101 to +200';
+      }
+      try {
+        var prompt = 'Write 2-3 sentences analyzing why ' + betOn + ' is interesting against ' + opp + ' in this UFC fight. Focus only on fighter attributes: style, experience, finishing ability, recent form. Do not mention odds or betting.';
+        var resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 200, messages: [{ role: 'user', content: prompt }] })
+        });
+        var data = await resp.json();
+        var analysis = data.content && data.content[0] ? data.content[0].text : 'Analysis unavailable.';
+        var openOdds = betOdds > 0 ? '+' + betOdds : betOdds;
+        var bottom = 'Based on opening odds of ' + openOdds + ' — model gives ' + betOn + ' ' + betProb + '% vs market\'s ' + mktProb + '%.';
+        if (sweetSpot) bottom += ' Model ' + (c.verdict === 'DISRESPECTED' ? 'loves' : 'likes') + ' this between ' + sweetSpot + '.';
+        var html = '<div>' + analysis + '</div><div class="fight-info-bottom">' + bottom + '</div>';
+        infoCache[i] = html;
+        panel.innerHTML = html;
+      } catch(e) {
+        panel.innerHTML = '<div style="color:var(--text3)">Analysis unavailable.</div>';
+      }
+    }
     function drawCard() {
       const root = document.getElementById('root');
       const main = state.filter(f => f.main_card !== false);

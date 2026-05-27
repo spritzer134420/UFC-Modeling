@@ -5,7 +5,8 @@ Fetches fresh DraftKings odds from The Odds API,
 updates card_predictions.json with new odds and recalculated verdicts.
 Run by GitHub Action twice daily.
 """
-import json, os, sys
+import json
+from datetime import datetime, os, sys
 from urllib.request import urlopen
 from urllib.error import URLError
 
