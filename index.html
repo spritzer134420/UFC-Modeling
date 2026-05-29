@@ -288,7 +288,7 @@
           <div class="fight-center">
             <span class="weight-class">${f.weight_class}</span>
             <div class="bar"><div class="bar-fill" style="width:${barWidth}%;background:${p1col}"></div></div>
-            <span class="verdict-pill ${pillCls}" id="pill-${gi}" onclick="toggleAnalysis(${gi})" style="cursor:pointer">${pill}</span><div id="analysis-${gi}" style="display:none;margin-top:8px;font-size:12px;color:var(--text2);line-height:1.5;padding:8px;background:rgba(255,255,255,0.05);border-radius:6px;text-align:left;"></div>
+            <span class="verdict-pill ${pillCls}" id="pill-${gi}" onclick="toggleAnalysis(${gi})" style="cursor:pointer">${pill}</span><div id="analysis-${gi}" style="display:none;margin-top:8px;font-size:12px;color:var(--text2);line-height:1.5;padding:8px;background:rgba(255,255,255,0.05);border-radius:6px;text-align:left;"></div>${f.analysis_footer ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;">${f.analysis_footer}</div>` : ''}
           </div>
           <div class="fighter right">
             <span class="fighter-name">${f.fighter2}</span>
