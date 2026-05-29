@@ -2,14 +2,14 @@
   {
     "event": "Song vs Figueiredo",
     "date": "Sat, May 30 / 7:00 AM EDT / Main Card",
-    "generated_at": "2026-05-28T15:00:53.223902",
+    "generated_at": "2026-05-29T17:38:22.012785",
     "backtest": {
-      "roi": 72.1,
-      "win_rate": 58.0,
-      "total_bets": 839,
-      "fav_roi": 14.1,
-      "dog_roi": 95.2,
-      "as_of": "2026-05-27"
+      "roi": 50.9,
+      "win_rate": 71.5,
+      "total_bets": 239,
+      "fav_roi": 52.3,
+      "dog_roi": 50.0,
+      "as_of": "2026-05-29"
     },
     "bouts": [
       {
@@ -29,7 +29,9 @@
         "within_cap": false,
         "verdict": "BET",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "Figueiredo brings elite finishing ability to 135 pounds, having demonstrated throughout his flyweight title reign that he can end fights with both his hands and submissions, giving him a dangerous dimension that Song has rarely faced. His relentless pressure and willingness to engage in chaotic, close-range exchanges could neutralize Song's technical striking advantages and drag the fight into uncomfortable territory for the Chinese contender. Despite the weight class transition, Figueiredo's championship experience and mental toughness in high-stakes moments make him a compelling threat against a Song who, while talented and riding momentum, has not yet been truly tested by a former world champion with Figueiredo's finishing résumé.",
+        "analysis_footer": "Model gives Deiveson Figueiredo 47% vs market's 18% — a 29.2% edge at +440."
       },
       {
         "fighter1": "Zhang Mingyang",
@@ -48,7 +50,9 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Alonzo Menifield 36% vs market's 32% — 4.4% edge. Below bet threshold."
       },
       {
         "fighter1": "Sergei Pavlovich",
@@ -56,18 +60,20 @@
         "weight_class": "Heavyweight Bout",
         "odds1": -600.0,
         "odds2": 450.0,
-        "prob1": 83.1,
-        "prob2": 16.9,
+        "prob1": 82.2,
+        "prob2": 17.8,
         "mkt_prob1": 82.5,
         "mkt_prob2": 17.5,
-        "edge1": 0.6,
-        "edge2": -0.6,
-        "bet_on": "Sergei Pavlovich",
-        "bet_odds": -600.0,
+        "edge1": -0.3,
+        "edge2": 0.3,
+        "bet_on": "Tallison Teixeira",
+        "bet_odds": 450.0,
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Tallison Teixeira 18% vs market's 18% — 0.3% edge. Below bet threshold."
       },
       {
         "fighter1": "Kai Asakura",
@@ -75,18 +81,20 @@
         "weight_class": "Bantamweight Bout",
         "odds1": -319.0,
         "odds2": 250.0,
-        "prob1": 74.4,
-        "prob2": 25.6,
+        "prob1": 70.0,
+        "prob2": 30.0,
         "mkt_prob1": 72.7,
         "mkt_prob2": 27.3,
-        "edge1": 1.7,
-        "edge2": -1.7,
-        "bet_on": "Kai Asakura",
-        "bet_odds": -319.0,
+        "edge1": -2.7,
+        "edge2": 2.7,
+        "bet_on": "Cameron Smotherman",
+        "bet_odds": 250.0,
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Cameron Smotherman 30% vs market's 27% — 2.7% edge. Below bet threshold."
       },
       {
         "fighter1": "Jake Matthews",
@@ -105,7 +113,9 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Carlston Harris 38% vs market's 27% — 11.3% edge. Below bet threshold."
       },
       {
         "fighter1": "Alex Perez",
@@ -124,7 +134,9 @@
         "within_cap": true,
         "verdict": "BET",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "Sumudaerji brings relentless forward pressure and genuine knockout power that is rare at flyweight, having finished multiple opponents with his aggressive striking combinations. His recent form shows a fighter who has sharpened his output and willingness to engage in firefights, which could be problematic for Perez if the Chinese fighter can dictate the pace early. While Perez is a durable and experienced grappler who can neutralize strikers, Sumudaerji's ability to land meaningful shots even when being taken down makes him a constant threat throughout all five minutes of each round.",
+        "analysis_footer": "Model gives Sumudaerji 54% vs market's 44% — a 10.8% edge at +120."
       },
       {
         "fighter1": "YiSak Lee",
@@ -132,37 +144,41 @@
         "weight_class": "Middleweight Bout",
         "odds1": -155.0,
         "odds2": 130.0,
-        "prob1": 56.2,
-        "prob2": 43.8,
+        "prob1": 60.1,
+        "prob2": 39.9,
         "mkt_prob1": 58.3,
         "mkt_prob2": 41.7,
-        "edge1": -2.1,
-        "edge2": 2.1,
-        "bet_on": "Luis Felipe Dias",
-        "bet_odds": 130.0,
-        "within_cap": true,
+        "edge1": 1.8,
+        "edge2": -1.8,
+        "bet_on": "YiSak Lee",
+        "bet_odds": -155.0,
+        "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives YiSak Lee 60% vs market's 58% — 1.8% edge. Below bet threshold."
       },
       {
         "fighter1": "Ding Meng",
-        "fighter2": "Jos\u00e9 Henrique",
+        "fighter2": "José Henrique",
         "weight_class": "Welterweight Bout",
         "odds1": -125.0,
         "odds2": 105.0,
-        "prob1": 50.9,
-        "prob2": 49.1,
+        "prob1": 50.0,
+        "prob2": 50.0,
         "mkt_prob1": 53.2,
         "mkt_prob2": 46.8,
-        "edge1": -2.4,
-        "edge2": 2.4,
-        "bet_on": "Jos\u00e9 Henrique",
+        "edge1": -3.2,
+        "edge2": 3.2,
+        "bet_on": "José Henrique",
         "bet_odds": 105.0,
         "within_cap": true,
         "verdict": "PASS_CAP",
         "model_found": false,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives José Henrique 50% vs market's 47% — 3.2% edge. Below bet threshold."
       },
       {
         "fighter1": "Aoriqileng",
@@ -170,18 +186,20 @@
         "weight_class": "Bantamweight Bout",
         "odds1": -175.0,
         "odds2": 145.0,
-        "prob1": 61.2,
-        "prob2": 38.8,
+        "prob1": 60.4,
+        "prob2": 39.6,
         "mkt_prob1": 60.9,
         "mkt_prob2": 39.1,
-        "edge1": 0.3,
-        "edge2": -0.3,
-        "bet_on": "Aoriqileng",
-        "bet_odds": -175.0,
-        "within_cap": false,
+        "edge1": -0.5,
+        "edge2": 0.5,
+        "bet_on": "Cody Haddon",
+        "bet_odds": 145.0,
+        "within_cap": true,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Cody Haddon 40% vs market's 39% — 0.5% edge. Below bet threshold."
       },
       {
         "fighter1": "Rei Tsuruya",
@@ -189,18 +207,20 @@
         "weight_class": "Bantamweight Bout",
         "odds1": -245.0,
         "odds2": 200.0,
-        "prob1": 68.5,
-        "prob2": 31.5,
+        "prob1": 71.4,
+        "prob2": 28.6,
         "mkt_prob1": 68.1,
         "mkt_prob2": 31.9,
-        "edge1": 0.4,
-        "edge2": -0.4,
+        "edge1": 3.4,
+        "edge2": -3.4,
         "bet_on": "Rei Tsuruya",
         "bet_odds": -245.0,
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Rei Tsuruya 71% vs market's 68% — 3.4% edge. Below bet threshold."
       },
       {
         "fighter1": "Angela Hill",
@@ -208,18 +228,20 @@
         "weight_class": "Women's Strawweight Bout",
         "odds1": 150.0,
         "odds2": -175.0,
-        "prob1": 35.5,
-        "prob2": 64.5,
+        "prob1": 35.2,
+        "prob2": 64.8,
         "mkt_prob1": 38.6,
         "mkt_prob2": 61.4,
-        "edge1": -3.1,
-        "edge2": 3.1,
+        "edge1": -3.4,
+        "edge2": 3.4,
         "bet_on": "Xiong Jingnan",
         "bet_odds": -175.0,
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": false,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Xiong Jingnan 65% vs market's 61% — 3.4% edge. Below bet threshold."
       },
       {
         "fighter1": "Zhu Kangjie",
@@ -227,18 +249,20 @@
         "weight_class": "Featherweight Bout",
         "odds1": -105.0,
         "odds2": -115.0,
-        "prob1": 47.8,
-        "prob2": 52.2,
+        "prob1": 52.7,
+        "prob2": 47.3,
         "mkt_prob1": 48.9,
         "mkt_prob2": 51.1,
-        "edge1": -1.1,
-        "edge2": 1.1,
-        "bet_on": "Rodrigo Vera",
-        "bet_odds": -115.0,
+        "edge1": 3.8,
+        "edge2": -3.8,
+        "bet_on": "Zhu Kangjie",
+        "bet_odds": -105.0,
         "within_cap": true,
         "verdict": "PASS_CAP",
         "model_found": false,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Zhu Kangjie 53% vs market's 49% — 3.8% edge. Below bet threshold."
       },
       {
         "fighter1": "Loma Lookboonmee",
@@ -257,7 +281,9 @@
         "within_cap": true,
         "verdict": "BET",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "Loma Lookboonmee brings a disciplined Muay Thai foundation that gives her a credible striking threat, particularly with her knees and clinch work, which could neutralize Amorim's aggressive forward pressure. However, Amorim's grappling credentials and finishing instincts make this a genuinely competitive stylistic puzzle, as Loma has historically struggled when opponents successfully drag fights to the mat. Loma's recent form and willingness to engage in firefights rather than rely solely on technical striking suggests she may be more comfortable in a scrappy, phone-booth exchange than her measured style implies.",
+        "analysis_footer": "Model gives Loma Lookboonmee 66% vs market's 51% — a 14.4% edge at -115."
       }
     ]
   }
