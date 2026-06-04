@@ -1,0 +1,50 @@
+[
+  {
+    "fight_id": "deiveson_figueiredo_2026-05-30",
+    "fighter": "Deiveson Figueiredo",
+    "opponent": "Song Yadong",
+    "event": "Song vs Figueiredo",
+    "date": "2026-05-30",
+    "year": 2026,
+    "odds": 440,
+    "model_prob": 46.9,
+    "mkt_prob": 17.8,
+    "edge": 29.2,
+    "verdict": "dog",
+    "won": false,
+    "result": "loss",
+    "pnl": -100.0
+  },
+  {
+    "fight_id": "sumudaerji_2026-05-30",
+    "fighter": "Sumudaerji",
+    "opponent": "Alex Perez",
+    "event": "Song vs Figueiredo",
+    "date": "2026-05-30",
+    "year": 2026,
+    "odds": 120,
+    "model_prob": 54.4,
+    "mkt_prob": 43.7,
+    "edge": 10.8,
+    "verdict": "cap_dog",
+    "won": false,
+    "result": "no_contest",
+    "pnl": 0.0
+  },
+  {
+    "fight_id": "loma_lookboonmee_2026-05-30",
+    "fighter": "Loma Lookboonmee",
+    "opponent": "Jaqueline Amorim",
+    "event": "Song vs Figueiredo",
+    "date": "2026-05-30",
+    "year": 2026,
+    "odds": -115,
+    "model_prob": 65.5,
+    "mkt_prob": 51.1,
+    "edge": 14.4,
+    "verdict": "fav",
+    "won": false,
+    "result": "loss",
+    "pnl": -100.0
+  }
+]

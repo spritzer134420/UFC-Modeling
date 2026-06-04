@@ -1,561 +1,877 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UFC Edge Analyzer</title>
-  <style>
-    :root {
-      --bg: #0a0a0a;
-      --bg2: #141414;
-      --bg3: #1e1e1e;
-      --border: rgba(255,255,255,0.08);
-      --border2: rgba(255,255,255,0.14);
-      --text: #f0f0f0;
-      --text2: #888;
-      --text3: #555;
-      --green: #4ade80;
-      --green-bg: rgba(74,222,128,0.1);
-      --red: #f87171;
-      --red-bg: rgba(248,113,113,0.1);
-      --blue: #60a5fa;
-      --blue-bg: rgba(96,165,250,0.1);
-      --amber: #fbbf24;
-      --amber-bg: rgba(251,191,36,0.1);
-      --radius: 10px;
-      --radius-sm: 6px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; min-height: 100vh; }
-    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
-    .header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 8px; }
-    .header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
-    .header-sub { font-size: 12px; color: var(--text2); }
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-    .stat { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
-    .stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
-    .stat-value { font-size: 20px; font-weight: 600; }
-    .stat-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
-    .green { color: var(--green); }
-    .red { color: var(--red); }
-    .blue { color: var(--blue); }
-    .amber { color: var(--amber); }
-    .event-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
-    .event-name { font-size: 15px; font-weight: 600; }
-    .event-meta { font-size: 11px; color: var(--text2); }
-    .card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
-    .section-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 16px; background: var(--bg3); border-bottom: 0.5px solid var(--border); }
-    .fight { border-bottom: 0.5px solid var(--border); }
-    .fight:last-child { border-bottom: none; }
-    .fight-main { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 14px 16px 10px; gap: 12px; }
-    .fighter { display: flex; flex-direction: column; gap: 3px; }
-    .fighter.right { align-items: flex-end; text-align: right; }
-    .fighter-name { font-size: 14px; font-weight: 600; }
-    .fighter-odds { font-size: 12px; color: var(--text2); }
-    .fighter-prob-model { font-size: 12px; font-weight: 600; }
-    .fighter-prob-mkt { font-size: 11px; color: var(--text3); }
-    .fight-center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .weight-class { font-size: 10px; color: var(--text3); }
-    .bar { width: 88px; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
-    .verdict-pill { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
-    .pill-bet-dog { background: var(--green-bg); color: var(--green); border: 0.5px solid rgba(74,222,128,0.3); }
-    .pill-bet-fav { background: var(--blue-bg); color: var(--blue); border: 0.5px solid rgba(96,165,250,0.3); }
-    .pill-cap { background: var(--amber-bg); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
-    .pill-disagree { background: rgba(251,191,36,0.15); color: #f59e0b; border: 0.5px solid rgba(251,191,36,0.4); }
-    .pill-intrigued { background: rgba(234,179,8,0.10); color: #ca8a04; border: 0.5px solid rgba(234,179,8,0.3); }
-    .fight-info-panel { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 4px; font-size: 12px; color: var(--text2); line-height: 1.6; display: none; }
-    .fight-info-bottom { margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text3); }
-    .info-btn { background: none; border: none; color: var(--text3); font-size: 11px; cursor: pointer; padding: 2px 6px; vertical-align: middle; }
-    .pill-pass { background: transparent; color: var(--text3); border: 0.5px solid var(--border); }
-    .pill-pending { background: rgba(251,191,36,0.1); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
-    .pending-banner { background: rgba(251,191,36,0.08); border: 0.5px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 10px 16px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--amber); }
-    .pending-banner strong { font-weight: 600; }
-    .edge-strip { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 0.5px solid var(--border); }
-    .edge-cell { padding: 8px 16px; }
-    .edge-cell:not(:last-child) { border-right: 0.5px solid var(--border); }
-    .edge-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
-    .edge-val { font-size: 12px; font-weight: 600; }
-    .odds-edit { display: none; padding: 10px 16px; background: var(--bg3); border-top: 0.5px solid var(--border); align-items: center; gap: 8px; flex-wrap: wrap; }
-    .odds-edit.open { display: flex; }
-    .odds-edit label { font-size: 11px; color: var(--text2); }
-    .odds-edit input { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 12px; padding: 5px 8px; width: 72px; outline: none; }
-    .odds-edit input:focus { border-color: var(--blue); }
-    .odds-edit button { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); cursor: pointer; font-size: 11px; padding: 5px 12px; }
-    .odds-edit button:hover { border-color: var(--blue); color: var(--blue); }
-    .edit-toggle { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 10px; padding: 0 16px 10px; text-decoration: underline; text-underline-offset: 2px; display: block; }
-    .edit-toggle:hover { color: var(--text2); }
-    .footer-note { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 16px; font-size: 12px; color: var(--text2); margin-top: 4px; }
-    .footer-note strong { color: var(--text); }
-    .loading { text-align: center; padding: 4rem 1rem; color: var(--text2); }
-    .dot { display: inline-block; animation: blink 1.2s infinite; }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
-    .live-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--green); background: var(--green-bg); border: 0.5px solid rgba(74,222,128,0.3); border-radius: 99px; padding: 2px 8px; }
-    .live-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    .refresh-btn { background: none; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); color: var(--text2); cursor: pointer; font-size: 11px; padding: 4px 10px; }
-    .refresh-btn:hover { color: var(--text); border-color: var(--text2); }
-    @media (max-width: 600px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .fight-main { padding: 12px 12px 8px; gap: 8px; }
-      .bar { width: 60px; }
-      .edge-strip { grid-template-columns: repeat(2, 1fr); }
-      .edge-cell:nth-child(2) { border-right: none; }
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edge · UFC</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #1e1b4b; --navy2: #231e5a; --navy3: #2a2468;
+  --blue: #1255cc; --blue2: #1a6aff; --teal: #00b4d8;
+  --white: #ffffff; --off: #f4f6f9; --border: #dde3ed;
+  --text: #0f1923; --text2: #5a6a7e; --text3: #9aaabb;
+  --green: #1a8a4a; --green-bg: #e8f7ee; --green-border: #a8ddb8;
+  --red: #c0392b; --amber: #d4860a; --amber-bg: #fef3dc; --r: 8px;
+}
+* { -webkit-font-smoothing: antialiased; }
+body { background: var(--off); font-family: 'Inter', sans-serif; color: var(--text); min-height: 100vh; }
 
-    .parlay-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-top: 4px; }
-    .parlay-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-    .parlay-tag { background: rgba(251,191,36,0.15); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); border-radius: 99px; font-size: 10px; padding: 2px 8px; }
-    .parlay-legs { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-    .parlay-leg { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-    .parlay-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 0.5px solid var(--border); padding-top: 10px; }
-    .parlay-stat-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
-    .parlay-stat-val { font-size: 13px; font-weight: 700; color: var(--green); }
-    .parlay-disclaimer { font-size: 10px; color: var(--text3); margin-top: 8px; text-align: center; }
+/* NAV */
+.nav { background: var(--navy); height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-size: 18px; font-weight: 900; color: white; letter-spacing: -0.5px; }
+.nav-logo span { color: var(--teal); }
+.nav-tabs { display: flex; gap: 2px; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 3px; }
+.nav-tab { padding: 5px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'Inter', sans-serif; }
+.nav-tab.active { background: white; color: var(--navy); }
+.nav-tab:hover:not(.active) { color: white; }
+.nav-live { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); }
+.nav-live-dot { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
 
-    .how-it-works-wrap { margin-bottom: 12px; }
-    .how-it-works-btn { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 14px; width: 100%; text-align: left; color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; }
-    .how-it-works { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; margin-top: 4px; }
-    .how-it-works p { font-size: 12px; color: var(--text2); margin: 0 0 8px 0; line-height: 1.5; }
-    .how-it-works p:last-child { margin-bottom: 0; }
-    .info-btn { background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer; padding: 0 4px; vertical-align: middle; }
-    .info-btn:hover { color: var(--text); }
-    .fight-info-panel { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px; margin-top: 4px; font-size: 12px; color: var(--text2); line-height: 1.5; }
-    .fight-info-bottom { margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text3); }
-  </style>
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* CARD PAGE */
+.card-page { max-width: 700px; margin: 0 auto; padding: 16px 16px 80px; }
+.event-header { background: var(--navy); border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.event-name { font-size: 18px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.event-date { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; font-weight: 500; }
+.event-pills { display: flex; gap: 8px; }
+.event-pill { text-align: center; background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 14px; }
+.ep-val { font-size: 17px; font-weight: 800; color: white; line-height: 1; }
+.ep-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+
+/* PICKS */
+.picks-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; padding-left: 2px; }
+.picks-scroll { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.pick-tile { background: white; border: 1.5px solid var(--border); border-radius: var(--r); padding: 14px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+.pick-tile:hover { border-color: var(--blue2); box-shadow: 0 2px 12px rgba(26,106,255,0.1); }
+.pick-tile.dog { border-color: #e0c070; background: linear-gradient(160deg, #fffbf0 0%, white 50%); }
+.pick-tile.dog:hover { border-color: var(--amber); }
+.pick-type { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; color: var(--green); }
+.pick-type.amber { color: var(--amber); }
+.pick-fighter { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.1; margin-bottom: 3px; }
+.pick-matchup { font-size: 11px; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
+.pick-odds-btn { display: flex; align-items: center; justify-content: center; background: var(--navy); color: white; border-radius: 6px; padding: 8px; font-size: 17px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 8px; }
+.pick-odds-btn.dog-btn { background: var(--amber); }
+.pick-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); }
+.pick-meta strong { color: var(--green); font-weight: 700; }
+.pick-meta strong.amber { color: var(--amber); }
+.pick-range { font-size: 10px; color: var(--text3); text-align: center; margin-top: 6px; font-weight: 500; }
+.pick-analysis { margin-top: 12px; padding-top: 12px; font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+/* SECTION LABEL */
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; padding-left: 2px; }
+
+/* FIGHT CARDS */
+.fight-card { background: white; border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 6px; overflow: hidden; transition: border-color 0.15s; }
+.fight-card.is-bet { border-color: var(--green-border); }
+.fight-card.is-dog { border-color: #e0c070; }
+.fc-top { padding: 14px 16px 12px; }
+.fc-weight { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.fc-fighters { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.fc-fighter { display: flex; flex-direction: column; gap: 3px; }
+.fc-fighter.r { align-items: flex-end; text-align: right; }
+.fc-name { font-size: 15px; font-weight: 800; letter-spacing: -0.2px; line-height: 1.1; }
+.fc-odds-btn { display: inline-flex; align-items: center; justify-content: center; background: var(--off); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; transition: all 0.15s; min-width: 64px; }
+.fc-odds-btn:hover { border-color: var(--blue2); background: #f0f4ff; color: var(--blue); }
+.fc-odds-btn.highlighted { background: var(--navy); border-color: var(--navy); color: white; }
+.fc-odds-btn.dog-h { background: var(--amber); border-color: var(--amber); color: white; }
+.fc-prob { font-size: 11px; color: var(--text3); font-weight: 500; }
+.fc-center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.fc-vs { font-size: 11px; font-weight: 700; color: var(--text3); }
+.fc-bar-wrap { width: 60px; }
+.fc-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.fc-bar-fill { height: 100%; background: var(--navy); border-radius: 2px; }
+.fc-verdict { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+.v-bet { background: var(--green-bg); color: var(--green); }
+.v-dog { background: var(--amber-bg); color: var(--amber); }
+.v-pass { background: var(--off); color: var(--text3); }
+.v-intrigued { background: #e8f0ff; color: var(--blue); }
+.fc-bottom { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); }
+.fc-stat { padding: 8px 14px; border-right: 1px solid var(--border); }
+.fc-stat:last-child { border-right: none; }
+.fc-stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text3); margin-bottom: 2px; }
+.fc-stat-val { font-size: 13px; font-weight: 700; }
+.pos { color: var(--green); } .neg { color: var(--red); } .neu { color: var(--text2); }
+
+/* BET RANGE STRIP */
+.bet-range-strip { padding: 7px 16px; border-top: 1px solid rgba(0,180,216,0.15); background: rgba(0,180,216,0.04); display: flex; justify-content: space-between; align-items: center; }
+.brs-label { font-size: 11px; color: var(--text2); font-weight: 500; }
+.brs-val { font-size: 11px; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
+
+/* ODDS SLIDER */
+.odds-slider-wrap { border-top: 1px solid var(--border); padding: 12px 16px 14px; background: var(--off); }
+.osl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.osl-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); }
+.osl-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.osl-fighter { font-size: 12px; font-weight: 600; color: var(--text2); width: 110px; flex-shrink: 0; }
+.osl-slider { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer; }
+.osl-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--navy); cursor: pointer; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.osl-val { font-size: 13px; font-weight: 700; width: 52px; text-align: right; flex-shrink: 0; }
+.osl-verdict { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 7px; margin-top: 4px; transition: all 0.2s; }
+.osl-verdict-label { font-size: 12px; font-weight: 800; }
+.osl-verdict-edge { font-size: 12px; font-weight: 700; }
+.verdict-loves { background: var(--green-bg); border: 1px solid var(--green-border); }
+.verdict-loves .osl-verdict-label, .verdict-loves .osl-verdict-edge { color: var(--green); }
+.verdict-dog { background: var(--amber-bg); border: 1px solid #e0c070; }
+.verdict-dog .osl-verdict-label, .verdict-dog .osl-verdict-edge { color: var(--amber); }
+.verdict-intrigued { background: #e8f0ff; border: 1px solid #c0d4ff; }
+.verdict-intrigued .osl-verdict-label, .verdict-intrigued .osl-verdict-edge { color: var(--blue); }
+.verdict-pass { background: var(--off); border: 1px solid var(--border); }
+.verdict-pass .osl-verdict-label, .verdict-pass .osl-verdict-edge { color: var(--text3); }
+.osl-toggle { font-size: 11px; font-weight: 600; color: var(--blue); cursor: pointer; padding: 0; border: none; background: none; font-family: 'Inter', sans-serif; }
+
+/* PRELIMS */
+.prelims-sep { display: flex; align-items: center; gap: 12px; margin: 14px 0 8px; }
+.prelims-line { flex:1; height:1px; background: var(--border); }
+.prelims-text { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); }
+
+/* BACKTEST PAGE */
+.bt-page { max-width: 700px; margin: 0 auto; padding: 16px 16px 80px; }
+.bt-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+.bt-kpi { background: white; border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
+.bt-kpi-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.bt-kpi-val { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--text); line-height: 1; margin-bottom: 4px; }
+.bt-kpi-val.green { color: var(--green); }
+.bt-kpi-val.neg { color: var(--red); }
+.bt-kpi-sub { font-size: 11px; color: var(--text3); }
+
+/* SUB TABS */
+.sub-tabs { display: flex; gap: 2px; background: var(--off); border: 1px solid var(--border); border-radius: var(--r); padding: 3px; margin-bottom: 12px; }
+.sub-tab { flex: 1; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; text-align: center; transition: all 0.15s; }
+.sub-tab.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); }
+.sub-tab:hover:not(.active) { color: var(--text); }
+.sub-page { display: none; }
+.sub-page.active { display: block; }
+
+.pastyear-roi-card { background: var(--navy); border-radius: var(--r); padding: 16px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.pyr-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+.pyr-val { font-size: 28px; font-weight: 900; color: var(--teal); letter-spacing: -0.8px; }
+.pyr-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+/* TABLES */
+.recent-table { background: white; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.rt-head { display: grid; grid-template-columns: 2fr 80px 70px 70px 80px 60px; padding: 10px 16px; background: var(--off); border-bottom: 1px solid var(--border); gap: 8px; }
+.rt-th { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text3); }
+.rt-row { display: grid; grid-template-columns: 2fr 80px 70px 70px 80px 60px; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 8px; align-items: center; }
+.rt-row:last-child { border-bottom: none; }
+.rt-row:hover { background: var(--off); }
+.rt-fighter { font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
+.rt-event { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.rt-val { font-size: 13px; font-weight: 600; color: var(--text2); }
+.rt-val.pos { color: var(--green); }
+.result-tag { display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 5px; }
+.r-w { background: var(--green-bg); color: var(--green); }
+.r-l { background: #fdecea; color: var(--red); }
+.r-nc { background: var(--off); color: var(--text3); border: 1px solid var(--border); }
+
+/* PASTYEAR TABLE */
+.py-head { display: grid; grid-template-columns: 2fr 1fr 80px 70px 70px 60px; padding: 10px 16px; background: var(--off); border-bottom: 1px solid var(--border); gap: 8px; }
+.py-row { display: grid; grid-template-columns: 2fr 1fr 80px 70px 70px 60px; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 8px; align-items: center; }
+.py-row:last-child { border-bottom: none; }
+.py-row:hover { background: var(--off); }
+
+/* BT CARD */
+.bt-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.bt-card { background: white; border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 8px; }
+.bt-card-title { font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 14px; }
+
+/* LOADING */
+.loading { text-align: center; padding: 60px 20px; color: var(--text2); font-size: 14px; }
+.loading-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin: 0 3px; animation: bounce 1.2s infinite; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .event-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .picks-scroll { grid-template-columns: 1fr; }
+  .fc-name { font-size: 13px; }
+  .fc-bottom { grid-template-columns: repeat(2, 1fr); }
+  .fc-stat:nth-child(2) { border-right: none; }
+  .bt-kpis { grid-template-columns: repeat(2, 1fr); }
+  .bt-two { grid-template-columns: 1fr; }
+  .rt-head, .py-head { display: none; }
+  .rt-row { grid-template-columns: 1fr 1fr; }
+  .py-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
+
+<div class="nav">
+  <div class="nav-logo">EDGE<span>.</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('card',this)">Card</button>
+    <button class="nav-tab" onclick="showPage('backtest',this)">Historical Accuracy</button>
+    <button class="nav-tab" onclick="showPage('model',this)">Model</button>
+  </div>
+  <div class="nav-live"><div class="nav-live-dot"></div><span id="live-badge-text">Live</span></div>
+</div>
+
+<!-- CARD PAGE -->
+<div class="page active" id="p-card">
+  <div class="card-page">
+    <div id="card-loading" class="loading">
+      <div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
+      <div style="margin-top:12px">Loading card predictions...</div>
+    </div>
+    <div id="card-content" style="display:none"></div>
+  </div>
+</div>
+
+<!-- BACKTEST PAGE -->
+<div class="page" id="p-backtest">
+  <div class="bt-page">
+    <div class="event-header" style="margin-bottom:12px">
       <div>
-        <h1>UFC Edge Analyzer</h1>
-        <div class="header-sub">4% edge · model vs market · Cards added as they come out</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span class="live-badge" id="live-badge" style="display:none"><span class="live-dot"></span>live odds</span>
-        <button class="refresh-btn" onclick="loadAll()">↻ refresh</button>
+        <div class="event-name">Historical Accuracy</div>
+        <div class="event-date">Walk-forward backtest · opening lines · ≥4% edge threshold</div>
       </div>
     </div>
-
-    <div class="stats-grid">
-      <div class="stat">
-        <div class="stat-label">Backtest ROI</div>
-        <div class="stat-value green" id="s-roi">+72.1%</div>
-        <div class="stat-sub">>=4% edge · opening lines</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Win rate</div>
-        <div class="stat-value" id="s-wr">58.0%</div>
-        <div class="stat-sub" id="s-bets">839 bets / 1254 fights</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Fav ROI</div>
-        <div class="stat-value green" id="s-fav">—</div>
-        <div class="stat-sub">favs within cap</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Dog ROI</div>
-        <div class="stat-value green" id="s-dog">—</div>
-        <div class="stat-sub">dogs within cap</div>
+    <div class="bt-kpis">
+      <div class="bt-kpi"><div class="bt-kpi-label">Total ROI</div><div class="bt-kpi-val green" id="kpi-roi">—</div><div class="bt-kpi-sub" id="kpi-bets">loading...</div></div>
+      <div class="bt-kpi"><div class="bt-kpi-label">Win Rate</div><div class="bt-kpi-val" id="kpi-wr">—</div><div class="bt-kpi-sub" id="kpi-fights">loading...</div></div>
+      <div class="bt-kpi"><div class="bt-kpi-label">Dog ROI</div><div class="bt-kpi-val green" id="kpi-dog">—</div><div class="bt-kpi-sub" id="kpi-dog-range">+101 to +600</div></div>
+      <div class="bt-kpi"><div class="bt-kpi-label">Fav ROI</div><div class="bt-kpi-val green" id="kpi-fav">—</div><div class="bt-kpi-sub" id="kpi-fav-range">-101 to -200</div></div>
+    </div>
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="showSub('fullbt',this)">Full Backtest</button>
+      <button class="sub-tab" onclick="showSub('pastyear',this)">Past Year</button>
+      <button class="sub-tab" onclick="showSub('recent',this)">Recent</button>
+    </div>
+    <div class="sub-page active" id="sub-fullbt">
+      <div class="bt-card">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">About the Model</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.8;max-width:560px">
+          This model has been tested against real UFC fights going back to 2015 — over a thousand fights across every weight class. It only flags a bet when it finds a meaningful gap between what the odds imply and what the data suggests. Most fights get passed on entirely.
+          <br><br>
+          The backtest is run in a way that simulates real conditions: the model never looks ahead, and is only trained on fights that already happened before the card being evaluated. What you see in the numbers is as close to a real-world track record as a model can produce.
+          <br><br>
+          The Past Year tab shows live results as they come in. Once a fight is more than a year old it rolls off automatically. Until enough real results accumulate, those numbers are drawn from the historical backtest.
+        </div>
       </div>
     </div>
-
-    <div style="margin-bottom:12px;"><button onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none'" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:10px 14px;width:100%;text-align:left;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">How this works &#9660;</button><div style="display:none;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:14px;margin-top:4px;"><p style="font-size:12px;color:var(--text2);margin:0 0 8px;line-height:1.5;">This model analyzes roughly 90 data points per fighter — striking output, wrestling volume, finishing rate, age, reach, recent form, and fight style — trained on thousands of UFC bouts since 2015.</p><p style="font-size:12px;color:var(--text2);margin:0 0 8px;line-height:1.5;">Edge % is how much the model's win probability differs from the sportsbook's implied probability, after removing the house cut.</p><p style="font-size:12px;color:var(--text2);margin:0 0 8px;line-height:1.5;">Bets are only flagged when the edge clears a statistically meaningful threshold, based on walk-forward testing against historical opening lines.</p><p style="font-size:12px;color:var(--text2);margin:0;line-height:1.5;">This is not financial advice. Bet responsibly.</p></div></div><div id="root">
-      <div class="loading">
-        <span class="dot">●</span> <span class="dot">●</span> <span class="dot">●</span>
-        <br><br>Loading card predictions...
+    <div class="sub-page" id="sub-pastyear">
+      <div class="pastyear-roi-card" id="pastyear-header">
+        <div><div class="pyr-label">Rolling 12-Month ROI</div><div class="pyr-val" id="py-roi">—</div></div>
+        <div><div class="pyr-label">Record</div><div class="pyr-val" id="py-record" style="font-size:20px;color:white">—</div></div>
+        <div><div class="pyr-sub">Uses backtest data until 12 months of live results accumulate</div></div>
+      </div>
+      <div id="pastyear-table-wrap">
+        <div class="loading" style="padding:30px">Loading...</div>
+      </div>
+    </div>
+    <div class="sub-page" id="sub-recent">
+      <div id="recent-table-wrap">
+        <div class="loading" style="padding:30px">Loading...</div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    const PREDICTIONS_URL = 'card_predictions.json';
-    const ODDS_API_KEY = '607a8a2924939354eaa7515d34ac762e';
-    const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
-
-    let state = [];
-    let currentEvent = '';
-    let currentDate = '';
-    let currentBacktest = {};
-    let liveOdds = {};
-
-    function imp(o) { return o > 0 ? 100/(o+100) : Math.abs(o)/(Math.abs(o)+100); }
-    function oddsStr(o) { return (o > 0 ? '+' : '') + Math.round(o); }
-    function evStr(prob, odds) {
-      const pay = odds > 0 ? odds/100 : 100/Math.abs(odds);
-      const ev = (prob/100 * pay - (1 - prob/100)) * 100;
-      return (ev > 0 ? '+' : '') + '$' + ev.toFixed(1);
-    }
-
-    function recalc(f) {
-      if (f.predictions_pending || f.prob1 === null || f.prob1 === undefined) {
-        return { pending: true, m1: imp(f.odds1)*100, m2: imp(f.odds2)*100 };
-      }
-      const m1 = imp(f.odds1)*100, m2 = imp(f.odds2)*100;
-      const e1 = f.prob1 - m1, e2 = f.prob2 - m2;
-      let bet_on = null, bet_odds = null, verdict = 'PASS';
-      if (e1 >= e2 && e1 > 0) { bet_on = f.fighter1; bet_odds = f.odds1; }
-      else if (e2 > 0) { bet_on = f.fighter2; bet_odds = f.odds2; }
-      if (f.verdict) { verdict = f.verdict; bet_on = f.bet_on || bet_on; bet_odds = f.bet_odds || bet_odds; }
-      else if (bet_on && Math.abs(bet_odds) <= 150) verdict = 'BET';
-      else if (bet_on) verdict = 'PASS_CAP';
-      return { m1, m2, e1, e2, bet_on, bet_odds, verdict };
-    }
-
-    function setStats(bt) {
-      if (!bt) return;
-      currentBacktest = bt;
-      document.getElementById('s-roi').textContent = (bt.roi > 0 ? '+' : '') + bt.roi + '%';
-      document.getElementById('s-wr').textContent = bt.win_rate + '%';
-      document.getElementById('s-fav').textContent = (bt.fav_roi > 0 ? '+' : '') + bt.fav_roi + '%';
-      document.getElementById('s-dog').textContent = (bt.dog_roi > 0 ? '+' : '') + bt.dog_roi + '%';
-      document.getElementById('s-bets').textContent = (bt.total_bets || '—') + ' bets · as of ' + (bt.as_of || '');
-    }
-
-    async function fetchLiveOdds() {
-      try {
-        const res = await fetch(
-          `${ODDS_API_BASE}/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h&oddsFormat=american&bookmakers=draftkings&apiKey=${ODDS_API_KEY}`
-        );
-        if (!res.ok) { console.log('OddsAPI failed:', res.status); return; }
-        const games = await res.json();
-        if (!games.length) return;
-        const map = {};
-        games.forEach(game => {
-          const dk = (game.bookmakers || []).find(b => b.key === 'draftkings');
-          if (!dk) return;
-          const market = (dk.markets || []).find(m => m.key === 'h2h');
-          if (!market || market.outcomes.length < 2) return;
-          const o = market.outcomes;
-          const n1 = o[0].name.split(' ').pop().toLowerCase();
-          const n2 = o[1].name.split(' ').pop().toLowerCase();
-          map[`${n1}|${n2}`] = { o1: o[0].price, o2: o[1].price };
-          map[`${n2}|${n1}`] = { o1: o[1].price, o2: o[0].price };
-        });
-        liveOdds = map;
-        if (Object.keys(map).length > 0) {
-          document.getElementById('live-badge').style.display = 'inline-flex';
-          let updated = 0;
-          if (data.last_updated) { var ts=new Date(data.last_updated); var el=document.getElementById('last-updated'); if(el) el.textContent='Odds updated '+ts.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
-        state.forEach(f => {
-            const key = f.fighter1.split(' ').pop().toLowerCase() + '|' + f.fighter2.split(' ').pop().toLowerCase();
-            if (liveOdds[key]) { f.odds1 = liveOdds[key].o1; f.odds2 = liveOdds[key].o2; updated++; }
-          });
-          console.log(`Live odds updated for ${updated} fights`);
-        }
-      } catch(e) { console.log('OddsAPI unavailable:', e.message); }
-    }
-
-    function fightHTML(f, gi) {
-      const c = recalc(f);
-      const pending = c.pending;
-      const p1col = pending ? '#555' : (f.prob1 >= 50 ? '#60a5fa' : '#555');
-      const p2col = pending ? '#555' : (f.prob2 >= 50 ? '#60a5fa' : '#555');
-      const e1cls = pending ? '' : (c.e1 > 0 ? 'green' : 'red');
-      const e2cls = pending ? '' : (c.e2 > 0 ? 'green' : 'red');
-
-      let pill = 'PASS', pillCls = 'pill-pass';
-      if (pending) {
-        pillCls = 'pill-pending'; pill = 'predictions pending';
-      } else if (c.verdict === 'BET') {
-        if (Math.max(c.e1||0, c.e2||0) >= 25 && c.bet_odds > 200) { pillCls = 'pill-disagree'; pill = 'Disrespected Underdog · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); } else { pillCls = c.bet_odds < 0 ? 'pill-bet-fav' : 'pill-bet-dog'; pill = 'Model loves it · ' + c.bet_on.split(' ').pop() + ' ' + oddsStr(c.bet_odds); }
-      } else if (c.verdict === 'PASS_CAP') {
-        if (Math.max(c.e1||0, c.e2||0) >= 1.5) { pillCls = 'pill-intrigued'; pill = "Model's intrigued"; } else { pillCls = 'pill-pass'; pill = "Model's not feeling it"; }
-      } else if (Math.max(c.e1||0, c.e2||0) >= 1.5) {
-        pillCls = 'pill-intrigued'; pill = "Model's intrigued";
-      } else {
-        pillCls = 'pill-pass'; pill = "Model's not feeling it";
-      }
-
-      const prob1Display = pending ? '—' : f.prob1 + '%';
-      const prob2Display = pending ? '—' : f.prob2 + '%';
-      const barWidth = pending ? 50 : f.prob1;
-      const e1Display = pending ? '—' : (c.e1 > 0 ? '+' : '') + c.e1.toFixed(1) + '%';
-      const e2Display = pending ? '—' : (c.e2 > 0 ? '+' : '') + c.e2.toFixed(1) + '%';
-      const ev1Display = pending ? '—' : evStr(f.prob1, f.odds1);
-      const ev2Display = pending ? '—' : evStr(f.prob2, f.odds2);
-
-      return `<div class="fight" id="fight-${gi}">
-        <div class="fight-main">
-          <div class="fighter">
-            <span class="fighter-name">${f.fighter1}</span>
-            <span class="fighter-odds" id="d-o1-${gi}">${oddsStr(f.odds1)}</span>
-            <span class="fighter-prob-model" style="color:${p1col}">${prob1Display} model</span>
-            <span class="fighter-prob-mkt">${c.m1.toFixed(0)}% market</span>
-          </div>
-          <div class="fight-center">
-            <span class="weight-class">${f.weight_class}</span>
-            <div class="bar"><div class="bar-fill" style="width:${barWidth}%;background:${p1col}"></div></div>
-            <span class="verdict-pill ${pillCls}" id="pill-${gi}" onclick="toggleAnalysis(${gi})" style="cursor:pointer">${pill}</span><div id="analysis-${gi}" style="display:none;margin-top:8px;font-size:12px;color:var(--text2);line-height:1.5;padding:8px;background:rgba(255,255,255,0.05);border-radius:6px;text-align:left;"></div>${f.analysis_footer ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;">${f.analysis_footer}</div>` : ''}
-          </div>
-          <div class="fighter right">
-            <span class="fighter-name">${f.fighter2}</span>
-            <span class="fighter-odds" id="d-o2-${gi}">${oddsStr(f.odds2)}</span>
-            <span class="fighter-prob-model" style="color:${p2col}">${prob2Display} model</span>
-            <span class="fighter-prob-mkt">${c.m2.toFixed(0)}% market</span>
-          </div>
+<!-- MODEL PAGE -->
+<div class="page" id="p-model">
+  <div class="bt-page">
+    <div class="event-header" style="margin-bottom:12px">
+      <div>
+        <div class="event-name">How It Works</div>
+        <div class="event-date">112 features · walk-forward trained · no data leakage</div>
+      </div>
+    </div>
+    <div class="bt-kpis">
+      <div class="bt-kpi"><div class="bt-kpi-label">Features</div><div class="bt-kpi-val">112</div><div class="bt-kpi-sub">incl. 15 style features</div></div>
+      <div class="bt-kpi"><div class="bt-kpi-label">Training Fights</div><div class="bt-kpi-val">3,705</div><div class="bt-kpi-sub">2015 to present</div></div>
+      <div class="bt-kpi"><div class="bt-kpi-label">Min Edge</div><div class="bt-kpi-val">4%</div><div class="bt-kpi-sub">vs opening line</div></div>
+      <div class="bt-kpi"><div class="bt-kpi-label">Bet Types</div><div class="bt-kpi-val" style="font-size:18px">3 rules</div><div class="bt-kpi-sub">dogs, cap dogs, favs</div></div>
+    </div>
+    <div class="bt-card">
+      <div class="bt-card-title">What the Model Looks At</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8">
+        The model evaluates each fighter based on their complete UFC history — how dominant they have been, how their fighting style matches up against their opponent, and how they have been performing recently. Physical attributes and career trajectory also factor in, but the biggest signal is always how much better or worse a fighter has looked than the market expects.
+      </div>
+    </div>
+    <div class="bt-card">
+      <div class="bt-card-title">Betting Rules</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:13px;font-weight:800;color:var(--amber);margin-bottom:3px">🐶 Disrespected Dogs</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.5">Model disagrees heavily with the market on a big underdog.</div>
         </div>
-        <div class="edge-strip">
-          <div class="edge-cell">
-            <div class="edge-label">${f.fighter1.split(' ').pop()} edge</div>
-            <div class="edge-val ${e1cls}">${e1Display}</div>
-          </div>
-          <div class="edge-cell">
-            <div class="edge-label">${f.fighter1.split(' ').pop()} EV</div>
-            <div class="edge-val ${e1cls}">${ev1Display}</div>
-          </div>
-          <div class="edge-cell">
-            <div class="edge-label">${f.fighter2.split(' ').pop()} edge</div>
-            <div class="edge-val ${e2cls}">${e2Display}</div>
-          </div>
-          <div class="edge-cell">
-            <div class="edge-label">${f.fighter2.split(' ').pop()} EV</div>
-            <div class="edge-val ${e2cls}">${ev2Display}</div>
-          </div>
+        <div>
+          <div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:3px">✓ Close Fights</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.5">Model sees an edge on fights where odds are between -200 and +200.</div>
         </div>
-        <button class="edit-toggle" onclick="toggleEdit(${gi})">edit odds ↓</button>
-        <div class="odds-edit" id="edit-${gi}">
-          <label>${f.fighter1.split(' ').pop()}</label>
-          <input id="i1-${gi}" value="${oddsStr(f.odds1)}" placeholder="-200" />
-          <label>${f.fighter2.split(' ').pop()}</label>
-          <input id="i2-${gi}" value="${oddsStr(f.odds2)}" placeholder="+170" />
-          <button onclick="applyOdds(${gi})">apply</button>
+        <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">
+          All bets use opening lines only. The model is retrained before each card using only past data — no peeking ahead.
         </div>
-      </div>`;
-    }
+      </div>
+    </div>
+  </div>
+</div>
 
+<script>
+var PREDS_URL  = 'card_predictions.json';
+var STATS_URL  = 'backtest_stats.json';
+var HISTORY_URL = 'backtest_history.json';
 
-    function buildParlay() {
-      var legs = [];
-      state.forEach(function(f) {
-        var c = recalc(f);
-        if (c.verdict !== 'BET' || !c.bet_on || !c.bet_odds) return;
-        var betProb = c.bet_on === f.fighter1 ? f.prob1 : f.prob2;
-        if (betProb < 51) return;
-        legs.push({ fullName: c.bet_on, odds: c.bet_odds, prob: betProb });
-      });
-      if (legs.length < 2) return '';
-      var parlayDecimal = 1.0, combinedProb = 1.0;
-      legs.forEach(function(leg) {
-        parlayDecimal *= leg.odds > 0 ? (leg.odds/100+1) : (100/Math.abs(leg.odds)+1);
-        combinedProb *= leg.prob/100;
-      });
-      var pa = parlayDecimal >= 2 ? '+'+Math.round((parlayDecimal-1)*100) : '-'+Math.round(100/(parlayDecimal-1));
-      var lh = legs.map(function(l) {
-        return '<div class="parlay-leg"><span style="font-weight:600">'+l.fullName+'</span><span style="color:var(--green);font-weight:600">'+oddsStr(l.odds)+'</span></div>';
-      }).join('');
-      return '<div class="parlay-box"><div class="parlay-title">Parlay of the Week <span class="parlay-tag">HIGH RISK</span></div><div class="parlay-legs">'+lh+'</div><div class="parlay-stats"><div><div class="parlay-stat-label">Legs</div><div class="parlay-stat-val">'+legs.length+'</div></div><div><div class="parlay-stat-label">Parlay odds</div><div class="parlay-stat-val">'+pa+'</div></div><div><div class="parlay-stat-label">Hit prob</div><div class="parlay-stat-val">'+(combinedProb*100).toFixed(1)+'%</div></div></div><div class="parlay-disclaimer">Model-based · not financial advice</div></div>';
-    }
+var cardData    = null;
+var statsData   = null;
+var historyData = null;
+var fighterProbs = {};
 
+// ── UTILS ──────────────────────────────────────────────
 
-    function toggleHowItWorks() {
-      var el = document.getElementById('how-it-works');
-      var arrow = document.getElementById('hiw-arrow');
-      el.style.display = el.style.display === 'none' ? 'block' : 'none';
-      arrow.textContent = el.style.display === 'none' ? '▼' : '▲';
-    }
-    function toggleRoiInfo() {
-      var el = document.getElementById('roi-info');
-      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    }
-    var infoCache = {};
-    function toggleFightInfo(i) {
-      var panel = document.getElementById('info-panel-' + i);
-      if (!panel) return;
-      if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
-      panel.style.display = 'block';
-      if (infoCache[i]) { panel.innerHTML = infoCache[i]; return; }
-      var f = state[i];
-      if (f.analysis) {
-        var html = '<div>' + f.analysis + '</div>';
-        if (f.analysis_footer) html += '<div style="color:var(--text3);font-size:11px;margin-top:6px;">' + f.analysis_footer + '</div>';
-        infoCache[i] = html;
-        panel.innerHTML = html;
-        return;
-      }
-      panel.innerHTML = '<div style="color:var(--text3);font-size:11px;">Generating analysis...</div>';
-      generateFightAnalysis(f, i, panel);
-    }
-    async function generateFightAnalysis(f, i, panel) {
-      var c = recalc(f);
-      var betOn = c.bet_on || f.fighter1;
-      var opp = c.bet_on === f.fighter1 ? f.fighter2 : f.fighter1;
-      var betProb = c.bet_on === f.fighter1 ? f.prob1 : f.prob2;
-      var imp1 = f.odds1 < 0 ? Math.abs(f.odds1)/(Math.abs(f.odds1)+100) : 100/(f.odds1+100);
-      var imp2 = f.odds2 < 0 ? Math.abs(f.odds2)/(Math.abs(f.odds2)+100) : 100/(f.odds2+100);
-      var mktProb = Math.round((c.bet_on === f.fighter1 ? imp1 : imp2) * 100);
-      var betOdds = c.bet_odds || 0;
-      var sweetSpot = '';
-      if (c.verdict === 'DISRESPECTED') {
-        var minImplied = betProb/100 - 0.25;
-        var minOdds = minImplied > 0 ? Math.round(100/minImplied - 100) : 200;
-        sweetSpot = '+' + Math.max(200, minOdds) + ' to +600';
-      } else if (c.verdict === 'LOVES' && betOdds < 0) {
-        var maxImplied = betProb/100 - 0.04;
-        var maxOdds = maxImplied > 0 ? -Math.round(maxImplied/(1-maxImplied)*100) : -200;
-        sweetSpot = '-101 to ' + Math.max(-200, maxOdds);
-      } else if (c.verdict === 'LOVES') {
-        sweetSpot = '+101 to +200';
-      }
-      try {
-        var prompt = 'Write 2-3 sentences analyzing why ' + betOn + ' is interesting against ' + opp + ' in this UFC fight. Focus only on fighter attributes: style, experience, finishing ability, recent form. Do not mention odds or betting.';
-        var resp = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 200, messages: [{ role: 'user', content: prompt }] })
-        });
-        var data = await resp.json();
-        var analysis = data.content && data.content[0] ? data.content[0].text : 'Analysis unavailable.';
-        var openOdds = betOdds > 0 ? '+' + betOdds : betOdds;
-        var bottom = 'Based on opening odds of ' + openOdds + ' — model gives ' + betOn + ' ' + betProb + '% vs market\'s ' + mktProb + '%.';
-        if (sweetSpot) bottom += ' Model ' + (c.verdict === 'DISRESPECTED' ? 'loves' : 'likes') + ' this between ' + sweetSpot + '.';
-        var html = '<div>' + analysis + '</div><div class="fight-info-bottom">' + bottom + '</div>';
-        infoCache[i] = html;
-        panel.innerHTML = html;
-      } catch(e) {
-        panel.innerHTML = '<div style="color:var(--text3)">Analysis unavailable.</div>';
-      }
-    }
-    var infoCache = {};
-function toggleInfo(i) {
-  var p = document.getElementById("ip-"+i);
-  if (!p) return;
-  if (p.style.display === "block") { p.style.display = "none"; return; }
-  p.style.display = "block";
-  if (infoCache[i]) { p.innerHTML = infoCache[i]; return; }
-  p.innerHTML = "<em>Generating analysis...</em>";
-  var f = state[i];
-  var c = recalc(f);
-  var betOn = c.bet_on || f.fighter1;
-  var opp = betOn === f.fighter1 ? f.fighter2 : f.fighter1;
-  var betProb = betOn === f.fighter1 ? f.prob1 : f.prob2;
-  var imp1 = f.odds1 < 0 ? Math.abs(f.odds1)/(Math.abs(f.odds1)+100) : 100/(f.odds1+100);
-  var imp2 = f.odds2 < 0 ? Math.abs(f.odds2)/(Math.abs(f.odds2)+100) : 100/(f.odds2+100);
-  var mktProb = Math.round((betOn===f.fighter1 ? imp1 : imp2)*100);
-  var betOdds = c.bet_odds || 0;
-  var sweetSpot = "";
-  if (c.verdict==="BET" && betOdds > 200 && c.edge >= 0.25) { var mn=Math.max(200,Math.round(100/Math.max(betProb/100-0.25,0.01)-100)); sweetSpot = "+"+mn+" to +600"; }
-  else if (c.verdict==="BET" && betOdds < 0) { var mx=Math.max(-200,-Math.round((betProb/100-0.04)/(1-(betProb/100-0.04))*100)); sweetSpot = "-101 to "+mx; }
-  else if (c.verdict==="BET") { sweetSpot = "+101 to +200"; }
-  var prompt = "Write 2-3 sentences about why " + betOn + " is interesting in this UFC fight against " + opp + ". Focus on fighter attributes: style, experience, finishing ability, recent form. Do not mention odds or betting.";
-  fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 200, messages: [{ role: "user", content: prompt }] }) })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    var analysis = d.content && d.content[0] ? d.content[0].text : "Analysis unavailable.";
-    var openOdds = betOdds > 0 ? "+"+betOdds : String(betOdds);
-    var bottom = "Based on opening odds of "+openOdds+" — model gives "+betOn+" "+betProb+"% vs market's "+mktProb+"%."+(sweetSpot ? " Model likes this between "+sweetSpot+"." : "");
-    var html = "<div>"+analysis+"</div><div class='fight-info-bottom'>"+bottom+"</div>";
-    infoCache[i] = html; p.innerHTML = html;
-  }).catch(function() { p.innerHTML = "<em>Analysis unavailable.</em>"; });
+function imp(o) {
+  return o > 0 ? 100/(o+100) : Math.abs(o)/(Math.abs(o)+100);
 }
-function drawCard() {
-      const root = document.getElementById('root');
-      const main = state.filter(f => f.main_card !== false);
-      const pre  = state.filter(f => f.main_card === false);
-      let bets = state.filter(f => recalc(f).verdict === 'BET').length;
-      const isPending = state.some(f => f.predictions_pending || f.prob1 === null || f.prob1 === undefined);
 
-      let html = `<div class="event-header">
-        <span class="event-name">${currentEvent}</span>
-        <span class="event-meta">${currentDate}</span>
-      </div>`;
+function evStr(prob, odds) {
+  var pay = odds > 0 ? odds/100 : 100/Math.abs(odds);
+  var ev = (prob/100 * pay - (1 - prob/100)) * 100;
+  return (ev > 0 ? '+' : '') + '$' + ev.toFixed(1);
+}
 
-      if (isPending) {
-        html += `<div class="pending-banner">
-          ⚠ <span><strong>Model predictions pending.</strong> Odds are live but model probabilities haven't been run yet. Run <code>weekly_update.bat</code> to generate predictions.</span>
-        </div>`;
-      }
+function oddsStr(o) {
+  return (o > 0 ? '+' : '') + Math.round(o);
+}
 
-      if (main.length > 0) {
-        html += `<div class="card"><div class="section-label">Main card</div>`;
-        main.forEach(f => { html += fightHTML(f, state.indexOf(f)); });
-        html += `</div>`;
-      }
-      if (pre.length > 0) {
-        html += `<div class="card"><div class="section-label">Prelims</div>`;
-        pre.forEach(f => { html += fightHTML(f, state.indexOf(f)); });
-        html += `</div>`;
-      }
+function fmtRoi(v) {
+  return (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+}
 
-      html += `<div class="footer-note">
-        <strong>${bets} bet${bets !== 1 ? 's' : ''} flagged</strong> flagged this card (>=4% edge) ·
-        ${currentBacktest.total_bets || 148} historical bets in backtest ·
-        click <em>edit odds</em> on any fight to enter your own lines
-      </div>`;
+function resultTag(r) {
+  if (r === 'win')         return '<div class="result-tag r-w">WIN</div>';
+  if (r === 'loss')        return '<div class="result-tag r-l">LOSS</div>';
+  if (r === 'no_contest')  return '<div class="result-tag r-nc">N/C</div>';
+  return '<div class="result-tag r-nc">' + r.toUpperCase() + '</div>';
+}
 
-      var ph = buildParlay(); if (ph) html += ph;
-      root.innerHTML = html;
+function toAmerican(odds) {
+  return odds >= 0 ? '+' + odds : '' + odds;
+}
+
+function impliedProb(odds) {
+  if (odds > 0) return 100 / (odds + 100);
+  return Math.abs(odds) / (Math.abs(odds) + 100);
+}
+
+// ── PAGE SWITCHING ─────────────────────────────────────
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('p-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+var subStats = {};
+
+function showSub(id, btn) {
+  document.querySelectorAll('.sub-page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.sub-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('sub-' + id).classList.add('active');
+  btn.classList.add('active');
+  var s = subStats[id];
+  if (!s) return;
+  updateKpis(s);
+}
+
+function updateKpis(s) {
+  var roiEl = document.getElementById('kpi-roi');
+  roiEl.textContent = fmtRoi(s.roi);
+  roiEl.className = 'bt-kpi-val ' + (s.roi < 0 ? 'neg' : 'green');
+  document.getElementById('kpi-bets').textContent = s.bets + ' bets';
+  document.getElementById('kpi-wr').textContent = s.win_rate.toFixed(1) + '%';
+  document.getElementById('kpi-fights').textContent = (s.fights || s.bets) + ' flagged';
+  var dogEl = document.getElementById('kpi-dog');
+  dogEl.textContent = fmtRoi(s.dog_roi);
+  dogEl.className = 'bt-kpi-val ' + (s.dog_roi < 0 ? 'neg' : 'green');
+  var favEl = document.getElementById('kpi-fav');
+  favEl.textContent = fmtRoi(s.fav_roi);
+  favEl.className = 'bt-kpi-val ' + (s.fav_roi < 0 ? 'neg' : 'green');
+}
+
+// ── ODDS SLIDER ────────────────────────────────────────
+
+function toggleSlider(id) {
+  var wrap = document.getElementById('slider-wrap-' + id);
+  if (!wrap) return;
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateVerdict(id) {
+  var sl1 = document.getElementById('sl1-' + id);
+  var sl2 = document.getElementById('sl2-' + id);
+  var sv1 = document.getElementById('sv1-' + id);
+  var sv2 = document.getElementById('sv2-' + id);
+  var verdictEl = document.getElementById('sv-verdict-' + id);
+  var labelEl   = document.getElementById('sv-label-' + id);
+  var edgeEl    = document.getElementById('sv-edge-' + id);
+  if (!sl1 || !sl2) return;
+
+  var odds1 = parseInt(sl1.value);
+  var odds2 = parseInt(sl2.value);
+  sv1.textContent = toAmerican(odds1);
+  sv2.textContent = toAmerican(odds2);
+
+  var probs = fighterProbs[id] || {p1: 50, p2: 50};
+  var mkt1 = impliedProb(odds1) * 100;
+  var mkt2 = impliedProb(odds2) * 100;
+  var edge1 = probs.p1 - mkt1;
+  var edge2 = probs.p2 - mkt2;
+
+  var betOn, betOdds, edge, verdict, cssClass;
+  var n = fighterProbs[id] ? {f1: fighterProbs[id].f1, f2: fighterProbs[id].f2} : {f1:'Fighter 1', f2:'Fighter 2'};
+
+  if (edge1 >= edge2 && edge1 > 0) {
+    betOn = n.f1; betOdds = odds1; edge = edge1;
+  } else if (edge2 > 0) {
+    betOn = n.f2; betOdds = odds2; edge = edge2;
+  } else {
+    verdictEl.className = 'osl-verdict verdict-pass';
+    labelEl.textContent = 'No Edge at These Odds';
+    edgeEl.textContent = 'Move the sliders to find value';
+    return;
+  }
+
+  if (betOdds > 200 && edge >= 25) {
+    verdict = 'Disrespected Dog - Bet ' + betOn; cssClass = 'osl-verdict verdict-dog';
+  } else if (betOdds >= -200 && edge >= 4) {
+    verdict = 'Model Loves It - Bet ' + betOn; cssClass = 'osl-verdict verdict-loves';
+  } else if (edge > 0) {
+    verdict = 'Model is Intrigued - ' + betOn; cssClass = 'osl-verdict verdict-intrigued';
+  } else {
+    verdict = 'No Edge at These Odds'; cssClass = 'osl-verdict verdict-pass';
+  }
+
+  verdictEl.className = cssClass;
+  labelEl.textContent = verdict;
+  edgeEl.textContent = '+' + edge.toFixed(1) + '% edge at ' + toAmerican(betOdds);
+}
+
+function toggleAnalysis(id) {
+  var el = document.getElementById('analysis-' + id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── CARD RENDERING ─────────────────────────────────────
+
+function verdictClass(bout) {
+  var v = bout.verdict;
+  var o = bout.bet_odds;
+  if (v === 'BET' && o > 200) return 'is-dog';
+  if (v === 'BET') return 'is-bet';
+  return '';
+}
+
+function verdictBadge(bout) {
+  var v = bout.verdict;
+  var o = bout.bet_odds;
+  var name = (bout.bet_on || '').split(' ').pop();
+  if (v === 'BET' && o > 200 && (bout.edge1 >= 25 || bout.edge2 >= 25)) {
+    return '<div class="fc-verdict v-dog">🐶 Dog ' + oddsStr(o) + '</div>';
+  }
+  if (v === 'BET') {
+    return '<div class="fc-verdict v-bet">✓ Bet ' + oddsStr(o) + '</div>';
+  }
+  if (v === 'PASS_CAP') {
+    var e = Math.max(bout.edge1||0, bout.edge2||0);
+    if (e > 2) return '<div class="fc-verdict v-intrigued">Intrigued</div>';
+    return '<div class="fc-verdict v-pass">No Edge</div>';
+  }
+  return '<div class="fc-verdict v-pass">No Edge</div>';
+}
+
+function pickType(bout) {
+  var o = bout.bet_odds;
+  var e1 = bout.edge1 || 0;
+  var e2 = bout.edge2 || 0;
+  if (o > 200 && Math.max(e1,e2) >= 25) return {label:'🐶 Disrespected Dog', cls:'amber', btnCls:'dog-btn'};
+  return {label:'✓ Model Loves It', cls:'', btnCls:''};
+}
+
+function buildSlider(idx, f1, f2, p1, p2, o1, o2) {
+  var fid = 'f' + idx;
+  fighterProbs[fid] = {p1: p1, p2: p2, f1: f1, f2: f2};
+
+  var min1 = o1 < 0 ? Math.min(o1 * 2, -1500) : -500;
+  var max1 = o1 < 0 ? -101 : Math.max(o1 * 2, 800);
+  var min2 = o2 < 0 ? Math.min(o2 * 2, -1500) : 100;
+  var max2 = o2 > 0 ? Math.max(o2 * 2, 800) : -101;
+
+  // Determine initial verdict
+  var mkt1 = impliedProb(o1) * 100;
+  var mkt2 = impliedProb(o2) * 100;
+  var e1 = p1 - mkt1;
+  var e2 = p2 - mkt2;
+  var initVerdict = 'verdict-pass';
+  var initLabel = 'No Edge at These Odds';
+  var initEdge = 'Move the sliders to find value';
+  if (e1 >= e2 && e1 > 0) {
+    var bo = o1, ed = e1, bn = f1;
+    initLabel = (bo > 200 && ed >= 25) ? 'Disrespected Dog - Bet ' + bn : (ed >= 4 ? 'Model Loves It - Bet ' + bn : 'Model is Intrigued - ' + bn);
+    initVerdict = (bo > 200 && ed >= 25) ? 'verdict-dog' : (ed >= 4 ? 'verdict-loves' : 'verdict-intrigued');
+    initEdge = '+' + ed.toFixed(1) + '% edge at ' + toAmerican(o1);
+  } else if (e2 > 0) {
+    var bo = o2, ed = e2, bn = f2;
+    initLabel = (bo > 200 && ed >= 25) ? 'Disrespected Dog - Bet ' + bn : (ed >= 4 ? 'Model Loves It - Bet ' + bn : 'Model is Intrigued - ' + bn);
+    initVerdict = (bo > 200 && ed >= 25) ? 'verdict-dog' : (ed >= 4 ? 'verdict-loves' : 'verdict-intrigued');
+    initEdge = '+' + ed.toFixed(1) + '% edge at ' + toAmerican(o2);
+  }
+
+  return '<div class="odds-slider-wrap" id="slider-wrap-' + fid + '" style="display:none">' +
+    '<div class="osl-header"><div class="osl-label">Adjust Odds</div>' +
+    '<button class="osl-toggle" onclick="toggleSlider(\'' + fid + '\')">✕ Close</button></div>' +
+    '<div class="osl-row"><div class="osl-fighter">' + f1 + '</div>' +
+    '<input type="range" class="osl-slider" id="sl1-' + fid + '" min="' + min1 + '" max="' + max1 + '" value="' + o1 + '" step="5" oninput="updateVerdict(\'' + fid + '\')">' +
+    '<div class="osl-val" id="sv1-' + fid + '">' + toAmerican(o1) + '</div></div>' +
+    '<div class="osl-row"><div class="osl-fighter">' + f2 + '</div>' +
+    '<input type="range" class="osl-slider" id="sl2-' + fid + '" min="' + min2 + '" max="' + max2 + '" value="' + o2 + '" step="5" oninput="updateVerdict(\'' + fid + '\')">' +
+    '<div class="osl-val" id="sv2-' + fid + '">' + toAmerican(o2) + '</div></div>' +
+    '<div class="osl-verdict ' + initVerdict + '" id="sv-verdict-' + fid + '">' +
+    '<div class="osl-verdict-label" id="sv-label-' + fid + '">' + initLabel + '</div>' +
+    '<div class="osl-verdict-edge" id="sv-edge-' + fid + '">' + initEdge + '</div></div></div>';
+}
+
+function buildFightCard(bout, idx) {
+  var f1 = bout.fighter1 || '';
+  var f2 = bout.fighter2 || '';
+  var o1 = bout.odds1 || -110;
+  var o2 = bout.odds2 || -110;
+  var p1 = bout.prob1 || 50;
+  var p2 = bout.prob2 || 50;
+  var mp1 = bout.mkt_prob1 || imp(o1);
+  var mp2 = bout.mkt_prob2 || imp(o2);
+  var e1 = bout.edge1 || 0;
+  var e2 = bout.edge2 || 0;
+  var betOn = bout.bet_on || '';
+  var betOdds = bout.bet_odds || 0;
+  var verdict = bout.verdict || 'PASS';
+  var wc = bout.weight_class || '';
+  var analysis = bout.analysis || '';
+  var footer = bout.analysis_footer || '';
+
+  var isBet = verdict === 'BET';
+  var isDog = isBet && betOdds > 200;
+  var cardCls = verdictClass(bout);
+
+  var o1Cls = (isBet && betOn === f1) ? (isDog ? 'dog-h' : 'highlighted') : '';
+  var o2Cls = (isBet && betOn === f2) ? (isDog ? 'dog-h' : 'highlighted') : '';
+
+  var barWidth = Math.round(p1);
+
+  var evF1 = evStr(p1, o1);
+  var evF2 = evStr(p2, o2);
+  var e1Display = (e1 >= 0 ? '+' : '') + e1.toFixed(1) + '%';
+  var e2Display = (e2 >= 0 ? '+' : '') + e2.toFixed(1) + '%';
+  var e1Cls = e1 >= 4 ? 'pos' : e1 < 0 ? 'neg' : 'neu';
+  var e2Cls = e2 >= 4 ? 'pos' : e2 < 0 ? 'neg' : 'neu';
+  var ev1Cls = evF1.startsWith('+') ? 'pos' : 'neg';
+  var ev2Cls = evF2.startsWith('+') ? 'pos' : 'neg';
+
+  var fid = 'f' + idx;
+  var slider = buildSlider(idx, f1, f2, p1, p2, o1, o2);
+
+  // Bet range strip
+  var rangeStrip = '';
+  if (isBet && footer) {
+    rangeStrip = '<div class="bet-range-strip">' +
+      '<div class="brs-label">' + footer + '</div>' +
+      '</div>';
+  }
+
+  // Analysis panel
+  var analysisPanel = '';
+  if (isBet && analysis) {
+    analysisPanel = '<div id="analysis-' + idx + '" style="display:none;padding:12px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.6;background:rgba(0,0,0,0.02)">' +
+      analysis + '</div>';
+  }
+
+  return '<div class="fight-card ' + cardCls + '">' +
+    '<div class="fc-top">' +
+    '<div class="fc-weight">' + wc + '</div>' +
+    '<div class="fc-fighters">' +
+      '<div class="fc-fighter">' +
+        '<div class="fc-name">' + f1 + '</div>' +
+        '<div class="fc-odds-btn ' + o1Cls + '">' + oddsStr(o1) + '</div>' +
+        '<div class="fc-prob">' + p1.toFixed(0) + '% model · ' + mp1.toFixed(0) + '% mkt</div>' +
+      '</div>' +
+      '<div class="fc-center">' +
+        '<div class="fc-vs">VS</div>' +
+        '<div class="fc-bar-wrap"><div class="fc-bar"><div class="fc-bar-fill" style="width:' + barWidth + '%"></div></div></div>' +
+        verdictBadge(bout) +
+      '</div>' +
+      '<div class="fc-fighter r">' +
+        '<div class="fc-name">' + f2 + '</div>' +
+        '<div class="fc-odds-btn ' + o2Cls + '">' + oddsStr(o2) + '</div>' +
+        '<div class="fc-prob">' + p2.toFixed(0) + '% model · ' + mp2.toFixed(0) + '% mkt</div>' +
+      '</div>' +
+    '</div>' +
+    '</div>' +
+    rangeStrip +
+    (isBet && analysis ? '<div style="padding:4px 16px 8px;border-top:1px solid var(--border)"><button class="osl-toggle" onclick="toggleAnalysis(' + idx + ')">+ Analysis</button></div>' : '') +
+    analysisPanel +
+    '<div class="fc-bottom">' +
+      '<div class="fc-stat"><div class="fc-stat-label">' + f1.split(' ').pop() + ' Edge</div><div class="fc-stat-val ' + e1Cls + '">' + e1Display + '</div></div>' +
+      '<div class="fc-stat"><div class="fc-stat-label">' + f1.split(' ').pop() + ' EV</div><div class="fc-stat-val ' + ev1Cls + '">' + evF1 + '</div></div>' +
+      '<div class="fc-stat"><div class="fc-stat-label">' + f2.split(' ').pop() + ' Edge</div><div class="fc-stat-val ' + e2Cls + '">' + e2Display + '</div></div>' +
+      '<div class="fc-stat" style="display:flex;align-items:center;justify-content:flex-end;padding-right:14px">' +
+        '<button class="osl-toggle" onclick="toggleSlider(\'' + fid + '\')">⚙ Adjust odds</button>' +
+      '</div>' +
+    '</div>' +
+    slider +
+    '</div>';
+}
+
+function buildPickTile(bout, idx) {
+  var betOn = bout.bet_on || '';
+  var opponent = betOn === bout.fighter1 ? bout.fighter2 : bout.fighter1;
+  var betOdds = bout.bet_odds || 0;
+  var prob = betOn === bout.fighter1 ? bout.prob1 : bout.prob2;
+  var mktProb = betOn === bout.fighter1 ? bout.mkt_prob1 : bout.mkt_prob2;
+  var edge = Math.max(Math.abs(bout.edge1||0), Math.abs(bout.edge2||0));
+  var wc = bout.weight_class || '';
+  var analysis = bout.analysis || '';
+  var footer = bout.analysis_footer || '';
+
+  var pt = pickType(bout);
+  var isDog = betOdds > 200 && edge >= 25;
+  var tileCls = isDog ? 'pick-tile dog' : 'pick-tile';
+
+  // Parse bet range from footer
+  var rangeText = '';
+  if (footer) {
+    var match = footer.match(/Bet range:\s*(.+?)\.?$/i);
+    if (match) rangeText = 'Bet range: ' + match[1];
+    else rangeText = footer;
+  }
+
+  var analysisHtml = '';
+  if (analysis) {
+    var borderCol = isDog ? '#e0c070' : 'var(--green-border)';
+    analysisHtml = '<div id="ptanalysis-' + idx + '" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid ' + borderCol + ';font-size:12px;color:var(--text2);line-height:1.6;">' +
+      analysis +
+      (footer ? '<div style="margin-top:6px;font-size:10px;color:var(--text3);">' + footer + '</div>' : '') +
+      '</div>';
+  }
+
+  return '<div class="' + tileCls + '" onclick="togglePickAnalysis(' + idx + ')">' +
+    '<div class="pick-type ' + pt.cls + '">' + pt.label + '</div>' +
+    '<div class="pick-fighter">' + betOn + '</div>' +
+    '<div class="pick-matchup">vs ' + opponent + ' · ' + wc + '</div>' +
+    '<div class="pick-odds-btn ' + pt.btnCls + '">' + oddsStr(betOdds) + '</div>' +
+    '<div class="pick-meta">' +
+      '<span>' + (prob||0).toFixed(0) + '% model</span>' +
+      '<span><strong class="' + pt.cls + '">+' + edge.toFixed(1) + '% edge</strong></span>' +
+    '</div>' +
+    (rangeText ? '<div class="pick-range">' + rangeText + '</div>' : '') +
+    analysisHtml +
+    '</div>';
+}
+
+function togglePickAnalysis(idx) {
+  var el = document.getElementById('ptanalysis-' + idx);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderCard(data) {
+  var card = Array.isArray(data) ? data[0] : data;
+  var bouts = card.bouts || [];
+  var event = card.event || 'UFC Fight Night';
+  var date  = card.date  || '';
+
+  var bets = bouts.filter(function(b) { return b.verdict === 'BET'; });
+  var main = bouts.filter(function(b) { return b.main_card !== false; });
+  var pre  = bouts.filter(function(b) { return b.main_card === false; });
+
+  var html = '';
+
+  // Event header
+  html += '<div class="event-header">' +
+    '<div><div class="event-name">' + event + '</div><div class="event-date">' + date + '</div></div>' +
+    '<div class="event-pills"><div class="event-pill"><div class="ep-val">' + bets.length + '</div><div class="ep-label">Bets Today</div></div></div>' +
+    '</div>';
+
+  // Picks spotlight
+  if (bets.length > 0) {
+    html += '<div class="picks-label">Model\'s Picks</div>';
+    html += '<div class="picks-scroll">';
+    bets.forEach(function(b, i) { html += buildPickTile(b, i); });
+    html += '</div>';
+  }
+
+  // Main card
+  if (main.length > 0) {
+    html += '<div class="section-label">Main Card</div>';
+    main.forEach(function(b, i) { html += buildFightCard(b, i); });
+  }
+
+  // Prelims
+  if (pre.length > 0) {
+    html += '<div class="prelims-sep"><div class="prelims-line"></div><div class="prelims-text">Prelims</div><div class="prelims-line"></div></div>';
+    pre.forEach(function(b, i) { html += buildFightCard(b, main.length + i); });
+  }
+
+  document.getElementById('card-loading').style.display = 'none';
+  var content = document.getElementById('card-content');
+  content.innerHTML = html;
+  content.style.display = 'block';
+}
+
+// ── BACKTEST RENDERING ─────────────────────────────────
+
+function renderStats(data) {
+  statsData = data;
+  subStats = {
+    fullbt:   data.fullbt   || {},
+    pastyear: data.pastyear || {},
+    recent:   data.recent   || {}
+  };
+  // Default to fullbt on load
+  updateKpis(subStats.fullbt);
+}
+
+function renderHistory(data) {
+  historyData = data;
+  var now = new Date();
+  var oneYearAgo = new Date(now);
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+  var recent = data.slice(0, 20);
+  var pastYear = data.filter(function(h) {
+    if (!h.date) return false;
+    var d = new Date(h.date);
+    return d >= oneYearAgo;
+  });
+
+  // Render recent table
+  var recentHtml = buildHistoryTable(recent, false);
+  document.getElementById('recent-table-wrap').innerHTML = recentHtml;
+
+  // Render past year table
+  var pastYearHtml = buildHistoryTable(pastYear, true);
+  document.getElementById('pastyear-table-wrap').innerHTML = pastYearHtml;
+
+  // Update past year ROI card
+  if (statsData && statsData.pastyear) {
+    var s = statsData.pastyear;
+    var pyRoi = document.getElementById('py-roi');
+    if (pyRoi) pyRoi.textContent = fmtRoi(s.roi);
+    var wins = pastYear.filter(function(h) { return h.result === 'win'; }).length;
+    var losses = pastYear.filter(function(h) { return h.result === 'loss'; }).length;
+    var pyRecord = document.getElementById('py-record');
+    if (pyRecord) pyRecord.textContent = wins + 'W · ' + losses + 'L';
+  }
+}
+
+function buildHistoryTable(bets, showPnl) {
+  if (!bets || bets.length === 0) {
+    return '<div class="bt-card" style="text-align:center;color:var(--text3);font-size:13px">No results yet</div>';
+  }
+
+  var cols = showPnl
+    ? '2fr 1fr 80px 70px 70px 60px'
+    : '2fr 80px 70px 70px 80px 60px';
+
+  var html = '<div class="recent-table">';
+
+  // Header
+  if (showPnl) {
+    html += '<div class="py-head" style="grid-template-columns:' + cols + '">' +
+      '<div class="rt-th">Fighter</div><div class="rt-th">Event</div>' +
+      '<div class="rt-th">Odds</div><div class="rt-th">Edge</div>' +
+      '<div class="rt-th">P&amp;L</div><div class="rt-th">Result</div></div>';
+  } else {
+    html += '<div class="rt-head">' +
+      '<div class="rt-th">Fighter</div><div class="rt-th">Odds</div>' +
+      '<div class="rt-th">Model</div><div class="rt-th">Market</div>' +
+      '<div class="rt-th">Edge</div><div class="rt-th">Result</div></div>';
+  }
+
+  bets.forEach(function(h) {
+    var oddsTxt = (h.odds > 0 ? '+' : '') + h.odds;
+    var edgeTxt = '+' + h.edge.toFixed(1) + '%';
+    var rowCls = showPnl ? 'py-row' : 'rt-row';
+
+    if (showPnl) {
+      var pnlTxt = h.result === 'no_contest' ? 'N/C' : (h.pnl >= 0 ? '+$' : '-$') + Math.abs(h.pnl).toFixed(0);
+      var pnlCls = h.result === 'no_contest' ? 'neu' : (h.pnl >= 0 ? 'pos' : 'neg');
+      html += '<div class="' + rowCls + '" style="grid-template-columns:' + cols + '">' +
+        '<div><div class="rt-fighter">' + h.fighter + '</div></div>' +
+        '<div class="rt-val" style="font-size:11px">' + (h.event || '').replace(/^(ufc\s+\d+:\s*)/i,'').substring(0,20) + '</div>' +
+        '<div class="rt-val ' + (h.odds > 0 ? 'pos' : '') + '">' + oddsTxt + '</div>' +
+        '<div class="rt-val pos">' + edgeTxt + '</div>' +
+        '<div class="rt-val ' + pnlCls + '">' + pnlTxt + '</div>' +
+        '<div>' + resultTag(h.result) + '</div>' +
+        '</div>';
+    } else {
+      html += '<div class="rt-row">' +
+        '<div><div class="rt-fighter">' + h.fighter + '</div><div class="rt-event">' + (h.event || '') + ' · ' + (h.date || '').substring(0,10) + '</div></div>' +
+        '<div class="rt-val ' + (h.odds > 0 ? 'pos' : '') + '">' + oddsTxt + '</div>' +
+        '<div class="rt-val">' + h.model_prob.toFixed(0) + '%</div>' +
+        '<div class="rt-val">' + h.mkt_prob.toFixed(0) + '%</div>' +
+        '<div class="rt-val pos">' + edgeTxt + '</div>' +
+        '<div>' + resultTag(h.result) + '</div>' +
+        '</div>';
     }
+  });
 
-    function toggleEdit(i) { document.getElementById(`edit-${i}`).classList.toggle('open'); }
+  html += '</div>';
+  return html;
+}
 
-    function applyOdds(i) {
-      const o1 = parseFloat(document.getElementById(`i1-${i}`).value);
-      const o2 = parseFloat(document.getElementById(`i2-${i}`).value);
-      if (!isNaN(o1)) state[i].odds1 = o1;
-      if (!isNaN(o2)) state[i].odds2 = o2;
-      drawCard();
-      document.getElementById(`edit-${i}`).classList.add('open');
-    }
+// ── DATA LOADING ───────────────────────────────────────
 
-    async function loadPredictions() {
-      try {
-        const r = await fetch(PREDICTIONS_URL + '?v=' + Date.now());
-        const data = await r.json();
-        const ev = Array.isArray(data) ? data[0] : data;
-        currentEvent = ev.event || 'UFC Event';
-        currentDate = ev.date || '';
-        state = (ev.bouts || []).map(b => ({...b}));
-        setStats(ev.backtest);
-      } catch(e) {
-        console.log('Predictions not found, using defaults');
-        loadDefaults();
-      }
-    }
+function loadAll() {
+  // Load card predictions
+  fetch(PREDS_URL + '?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      cardData = data;
+      renderCard(data);
+      // Update live badge
+      var now = new Date();
+      var timeStr = now.toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+      var badge = document.getElementById('live-badge-text');
+      if (badge) badge.textContent = 'Odds updated ' + timeStr;
+    })
+    .catch(function(e) {
+      document.getElementById('card-loading').innerHTML =
+        '<div style="color:var(--text3);font-size:13px">Could not load predictions. Run predict_card.py first.</div>';
+      console.error('Card load error:', e);
+    });
 
-    function loadDefaults() {
-      currentEvent = 'Song vs Figueiredo';
-      currentDate = 'May 9, 2026';
-      setStats({ roi:33.7, win_rate:64.2, fav_roi:80.8, dog_roi:18.6, total_bets:148, as_of:'2026-05-05' });
-      state = [
-        {fighter1:"Khamzat Chimaev",fighter2:"Sean Strickland",weight_class:"Middleweight",odds1:-500,odds2:380,prob1:58,prob2:42,main_card:true},
-        {fighter1:"Joshua Van",fighter2:"Tatsuro Taira",weight_class:"Flyweight",odds1:155,odds2:-190,prob1:38,prob2:62,main_card:true},
-        {fighter1:"Alexander Volkov",fighter2:"Waldo Cortes Acosta",weight_class:"Heavyweight",odds1:-180,odds2:150,prob1:52,prob2:48,main_card:true},
-        {fighter1:"Sean Brady",fighter2:"Joaquin Buckley",weight_class:"Welterweight",odds1:-185,odds2:155,prob1:45,prob2:55,main_card:true},
-        {fighter1:"King Green",fighter2:"Jeremy Stephens",weight_class:"Lightweight",odds1:-310,odds2:250,prob1:53,prob2:47,main_card:true},
-        {fighter1:"Joel Alvarez",fighter2:"Yaroslav Amosov",weight_class:"Welterweight",odds1:140,odds2:-170,prob1:38,prob2:62,main_card:false},
-        {fighter1:"Grant Dawson",fighter2:"Mateusz Rebecki",weight_class:"Lightweight",odds1:-140,odds2:118,prob1:57,prob2:43,main_card:false},
-        {fighter1:"Jim Miller",fighter2:"Jared Gordon",weight_class:"Lightweight",odds1:250,odds2:-320,prob1:25,prob2:75,main_card:false},
-        {fighter1:"Roman Kopylov",fighter2:"Marco Tulio",weight_class:"Middleweight",odds1:155,odds2:-190,prob1:41,prob2:59,main_card:false},
-        {fighter1:"Pat Sabatini",fighter2:"William Gomis",weight_class:"Featherweight",odds1:-200,odds2:168,prob1:49,prob2:51,main_card:false},
-        {fighter1:"Baisangur Susurkaev",fighter2:"Djorden Santos",weight_class:"Lightweight",odds1:-650,odds2:475,prob1:86,prob2:14,main_card:false},
-        {fighter1:"Clayton Carpenter",fighter2:"Jose Ochoa",weight_class:"Heavyweight",odds1:140,odds2:-170,prob1:40,prob2:60,main_card:false},
-        {fighter1:"Ateba Gautier",fighter2:"Ozzy Diaz",weight_class:"Lightweight",odds1:-1000,odds2:650,prob1:88,prob2:12,main_card:false},
-      ];
-    }
+  // Load backtest stats
+  fetch(STATS_URL + '?v=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderStats(data);
+      // Load history after stats are ready
+      return fetch(HISTORY_URL + '?v=' + Date.now());
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderHistory(data);
+    })
+    .catch(function(e) {
+      console.warn('Backtest data not available yet. Run generate_history.py first.');
+      // Fall back to empty state gracefully
+      document.getElementById('recent-table-wrap').innerHTML =
+        '<div class="bt-card" style="color:var(--text3);font-size:13px;text-align:center">Run generate_history.py to load backtest data</div>';
+      document.getElementById('pastyear-table-wrap').innerHTML =
+        '<div class="bt-card" style="color:var(--text3);font-size:13px;text-align:center">Run generate_history.py to load backtest data</div>';
+    });
+}
 
-    async function loadAll() {
-      document.getElementById('root').innerHTML = '<div class="loading"><span class="dot">●</span> <span class="dot">●</span> <span class="dot">●</span><br><br>Refreshing...</div>';
-      await loadPredictions();
-      await fetchLiveOdds();
-      drawCard();
-    }
-
-    loadAll();
-    function toggleAnalysis(gi) {
-      var panel = document.getElementById('analysis-' + gi);
-      if (!panel) return;
-      var fight = state[gi];
-      if (!fight || !fight.analysis) return;
-      if (panel.style.display === 'none') {
-        panel.innerHTML = '<div>' + fight.analysis + '</div>' + (fight.analysis_footer ? '<div style="margin-top:6px;color:var(--text3);font-size:11px;">' + fight.analysis_footer + '</div>' : '');
-        panel.style.display = 'block';
-      } else {
-        panel.style.display = 'none';
-      }
-    }
-  </script>
+window.addEventListener('load', loadAll);
+</script>
 </body>
 </html>
