@@ -9,11 +9,11 @@
     "fights_total": 1254
   },
   "pastyear": {
-    "roi": 91.6,
-    "win_rate": 59.4,
-    "bets": 143,
-    "fights": 143,
-    "dog_roi": 103.3,
+    "roi": 82.9,
+    "win_rate": 58.7,
+    "bets": 138,
+    "fights": 138,
+    "dog_roi": 93.9,
     "fav_roi": 9.9
   },
   "recent": {
@@ -24,5 +24,5 @@
     "dog_roi": 38.2,
     "fav_roi": -29.6
   },
-  "generated_at": "2026-06-06T20:06:47.896835"
+  "generated_at": "2026-06-07T18:28:49.862409"
 }
