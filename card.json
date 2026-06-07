@@ -1,0 +1,71 @@
+{
+  "fetched_at": "2026-06-07T18:34:05.997207",
+  "source": "ufc.com",
+  "events": [
+    {
+      "event": "UFC Freedom 250",
+      "date": "Sun, Jun 14 / 8:00 PM EDT / Main Card",
+      "location": "The White House Washington, DC United States",
+      "url": "https://www.ufc.com/event/ufc-freedom-250",
+      "bouts": [
+        {
+          "fighter1": "Ilia Topuria",
+          "fighter2": "Justin Gaethje",
+          "weight_class": "Lightweight Title Bout",
+          "title": true,
+          "odds1": -190,
+          "odds2": 400
+        },
+        {
+          "fighter1": "Alex Pereira",
+          "fighter2": "Ciryl Gane",
+          "weight_class": "Heavyweight Interim Title Bout",
+          "title": true,
+          "odds1": -115,
+          "odds2": -115
+        },
+        {
+          "fighter1": "Sean O'Malley",
+          "fighter2": "Aiemann Zahabi",
+          "weight_class": "Bantamweight Bout",
+          "title": false,
+          "odds1": -360,
+          "odds2": -360
+        },
+        {
+          "fighter1": "Josh Hokit",
+          "fighter2": "Derrick Lewis",
+          "weight_class": "Heavyweight Bout",
+          "title": false,
+          "odds1": -330,
+          "odds2": -330
+        },
+        {
+          "fighter1": "Mauricio Ruffy",
+          "fighter2": "Michael Chandler",
+          "weight_class": "Lightweight Bout",
+          "title": false,
+          "odds1": -700,
+          "odds2": -700
+        },
+        {
+          "fighter1": "Bo Nickal",
+          "fighter2": "Kyle Daukaus",
+          "weight_class": "Middleweight Bout",
+          "title": false,
+          "odds1": -300,
+          "odds2": -300
+        },
+        {
+          "fighter1": "Diego Lopes",
+          "fighter2": "Steve Garcia",
+          "weight_class": "Featherweight Bout",
+          "title": false,
+          "odds1": -185,
+          "odds2": -185
+        }
+      ]
+    }
+  ],
+  "total_bouts": 7
+}
