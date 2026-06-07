@@ -1,28 +1,28 @@
 {
   "fullbt": {
-    "roi": 71.7,
+    "roi": 71.4,
     "win_rate": 58.0,
-    "bets": 838,
-    "fights": 838,
-    "dog_roi": 79.4,
-    "fav_roi": 12.8,
+    "bets": 842,
+    "fights": 842,
+    "dog_roi": 79.2,
+    "fav_roi": 11.6,
     "fights_total": 1254
   },
   "pastyear": {
-    "roi": 82.9,
-    "win_rate": 58.7,
-    "bets": 138,
-    "fights": 138,
-    "dog_roi": 93.9,
-    "fav_roi": 9.9
+    "roi": 80.7,
+    "win_rate": 58.5,
+    "bets": 142,
+    "fights": 142,
+    "dog_roi": 92.6,
+    "fav_roi": 4.1
   },
   "recent": {
-    "roi": 21.2,
-    "win_rate": 45.0,
+    "roi": -2.2,
+    "win_rate": 40.0,
     "bets": 20,
     "fights": 20,
-    "dog_roi": 38.2,
-    "fav_roi": -29.6
+    "dog_roi": 17.3,
+    "fav_roi": -60.8
   },
-  "generated_at": "2026-06-07T18:42:04.162302"
+  "generated_at": "2026-06-07T18:45:27.758968"
 }
