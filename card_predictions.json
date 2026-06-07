@@ -29,7 +29,9 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Justin Gaethje 30% vs market's 17% — 12.5% edge. Below bet threshold."
       },
       {
         "fighter1": "Alex Pereira",
@@ -48,7 +50,9 @@
         "within_cap": true,
         "verdict": "BET",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "Alex Pereira brings elite knockout power and an aggressive Muay Thai-based striking game that has proven devastating at light heavyweight, and the question is whether that same finishing ability translates when stepping up to face a true heavyweight frame. Gane is one of the most technically sophisticated strikers in the heavyweight division, with fluid movement, sharp kickboxing, and the ability to control range and pace, which directly challenges Pereira's pressure-heavy approach. Pereira's recent form shows an almost alarming finishing rate and a warrior's mentality in adversity, but Gane's footwork and intelligence could make this a chess match that tests whether Poatan's raw violence can catch a heavyweight who refuses to stand and trade.",
+        "analysis_footer": "Model gives Alex Pereira 62% vs market's 50% — a 12.0% edge. Bet range: -140 to -101."
       },
       {
         "fighter1": "Sean O'Malley",
@@ -67,7 +71,9 @@
         "within_cap": false,
         "verdict": "BET",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "Sean O'Malley's unorthodox striking style, featuring exceptional lateral movement and pinpoint accuracy, creates serious problems for Zahabi, who tends to engage in more straightforward exchanges that could play directly into O'Malley's hands. O'Malley has demonstrated legitimate finishing power and has continued to sharpen his game at the highest level of competition, including his championship run, giving him a significant experience edge over Zahabi. While Zahabi is a tough and durable competitor, O'Malley's ability to control range, mix in creative combinations, and hurt opponents with either hand makes him a compelling favorite to impose his will throughout the fight.",
+        "analysis_footer": "Model gives Sean O'Malley 62% vs market's 28% — a 33.9% edge. Bet range: +173 to +600."
       },
       {
         "fighter1": "Josh Hokit",
@@ -86,7 +92,9 @@
         "within_cap": false,
         "verdict": "PASS",
         "model_found": false,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives None 73% vs market's 73% — 0.0% edge. Below bet threshold."
       },
       {
         "fighter1": "Mauricio Ruffy",
@@ -105,7 +113,9 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Michael Chandler 32% vs market's 18% — 13.5% edge. Below bet threshold."
       },
       {
         "fighter1": "Bo Nickal",
@@ -124,7 +134,9 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Kyle Daukaus 32% vs market's 27% — 4.6% edge. Below bet threshold."
       },
       {
         "fighter1": "Diego Lopes",
@@ -143,7 +155,9 @@
         "within_cap": false,
         "verdict": "PASS_CAP",
         "model_found": true,
-        "main_card": true
+        "main_card": true,
+        "analysis": "",
+        "analysis_footer": "Model gives Diego Lopes 68% vs market's 62% — 6.2% edge. Below bet threshold."
       }
     ]
   }
