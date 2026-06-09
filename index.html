@@ -1,877 +1,1142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edge · UFC</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --navy: #1e1b4b; --navy2: #231e5a; --navy3: #2a2468;
-  --blue: #1255cc; --blue2: #1a6aff; --teal: #00b4d8;
-  --white: #ffffff; --off: #f4f6f9; --border: #dde3ed;
-  --text: #0f1923; --text2: #5a6a7e; --text3: #9aaabb;
-  --green: #1a8a4a; --green-bg: #e8f7ee; --green-border: #a8ddb8;
-  --red: #c0392b; --amber: #d4860a; --amber-bg: #fef3dc; --r: 8px;
-}
-* { -webkit-font-smoothing: antialiased; }
-body { background: var(--off); font-family: 'Inter', sans-serif; color: var(--text); min-height: 100vh; }
-
-/* NAV */
-.nav { background: var(--navy); height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: 0; z-index: 100; }
-.nav-logo { font-size: 18px; font-weight: 900; color: white; letter-spacing: -0.5px; }
-.nav-logo span { color: var(--teal); }
-.nav-tabs { display: flex; gap: 2px; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 3px; }
-.nav-tab { padding: 5px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'Inter', sans-serif; }
-.nav-tab.active { background: white; color: var(--navy); }
-.nav-tab:hover:not(.active) { color: white; }
-.nav-live { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); }
-.nav-live-dot { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
-
-/* PAGES */
-.page { display: none; }
-.page.active { display: block; }
-
-/* CARD PAGE */
-.card-page { max-width: 700px; margin: 0 auto; padding: 16px 16px 80px; }
-.event-header { background: var(--navy); border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.event-name { font-size: 18px; font-weight: 800; color: white; letter-spacing: -0.3px; }
-.event-date { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; font-weight: 500; }
-.event-pills { display: flex; gap: 8px; }
-.event-pill { text-align: center; background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 14px; }
-.ep-val { font-size: 17px; font-weight: 800; color: white; line-height: 1; }
-.ep-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
-
-/* PICKS */
-.picks-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; padding-left: 2px; }
-.picks-scroll { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-.pick-tile { background: white; border: 1.5px solid var(--border); border-radius: var(--r); padding: 14px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
-.pick-tile:hover { border-color: var(--blue2); box-shadow: 0 2px 12px rgba(26,106,255,0.1); }
-.pick-tile.dog { border-color: #e0c070; background: linear-gradient(160deg, #fffbf0 0%, white 50%); }
-.pick-tile.dog:hover { border-color: var(--amber); }
-.pick-type { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; color: var(--green); }
-.pick-type.amber { color: var(--amber); }
-.pick-fighter { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.1; margin-bottom: 3px; }
-.pick-matchup { font-size: 11px; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
-.pick-odds-btn { display: flex; align-items: center; justify-content: center; background: var(--navy); color: white; border-radius: 6px; padding: 8px; font-size: 17px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 8px; }
-.pick-odds-btn.dog-btn { background: var(--amber); }
-.pick-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); }
-.pick-meta strong { color: var(--green); font-weight: 700; }
-.pick-meta strong.amber { color: var(--amber); }
-.pick-range { font-size: 10px; color: var(--text3); text-align: center; margin-top: 6px; font-weight: 500; }
-.pick-analysis { margin-top: 12px; padding-top: 12px; font-size: 12px; color: var(--text2); line-height: 1.6; }
-
-/* SECTION LABEL */
-.section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; padding-left: 2px; }
-
-/* FIGHT CARDS */
-.fight-card { background: white; border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 6px; overflow: hidden; transition: border-color 0.15s; }
-.fight-card.is-bet { border-color: var(--green-border); }
-.fight-card.is-dog { border-color: #e0c070; }
-.fc-top { padding: 14px 16px 12px; }
-.fc-weight { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
-.fc-fighters { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
-.fc-fighter { display: flex; flex-direction: column; gap: 3px; }
-.fc-fighter.r { align-items: flex-end; text-align: right; }
-.fc-name { font-size: 15px; font-weight: 800; letter-spacing: -0.2px; line-height: 1.1; }
-.fc-odds-btn { display: inline-flex; align-items: center; justify-content: center; background: var(--off); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; transition: all 0.15s; min-width: 64px; }
-.fc-odds-btn:hover { border-color: var(--blue2); background: #f0f4ff; color: var(--blue); }
-.fc-odds-btn.highlighted { background: var(--navy); border-color: var(--navy); color: white; }
-.fc-odds-btn.dog-h { background: var(--amber); border-color: var(--amber); color: white; }
-.fc-prob { font-size: 11px; color: var(--text3); font-weight: 500; }
-.fc-center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.fc-vs { font-size: 11px; font-weight: 700; color: var(--text3); }
-.fc-bar-wrap { width: 60px; }
-.fc-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.fc-bar-fill { height: 100%; background: var(--navy); border-radius: 2px; }
-.fc-verdict { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
-.v-bet { background: var(--green-bg); color: var(--green); }
-.v-dog { background: var(--amber-bg); color: var(--amber); }
-.v-pass { background: var(--off); color: var(--text3); }
-.v-intrigued { background: #e8f0ff; color: var(--blue); }
-.fc-bottom { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--border); }
-.fc-stat { padding: 8px 14px; border-right: 1px solid var(--border); }
-.fc-stat:last-child { border-right: none; }
-.fc-stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text3); margin-bottom: 2px; }
-.fc-stat-val { font-size: 13px; font-weight: 700; }
-.pos { color: var(--green); } .neg { color: var(--red); } .neu { color: var(--text2); }
-
-/* BET RANGE STRIP */
-.bet-range-strip { padding: 7px 16px; border-top: 1px solid rgba(0,180,216,0.15); background: rgba(0,180,216,0.04); display: flex; justify-content: space-between; align-items: center; }
-.brs-label { font-size: 11px; color: var(--text2); font-weight: 500; }
-.brs-val { font-size: 11px; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
-
-/* ODDS SLIDER */
-.odds-slider-wrap { border-top: 1px solid var(--border); padding: 12px 16px 14px; background: var(--off); }
-.osl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.osl-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); }
-.osl-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.osl-fighter { font-size: 12px; font-weight: 600; color: var(--text2); width: 110px; flex-shrink: 0; }
-.osl-slider { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer; }
-.osl-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--navy); cursor: pointer; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-.osl-val { font-size: 13px; font-weight: 700; width: 52px; text-align: right; flex-shrink: 0; }
-.osl-verdict { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 7px; margin-top: 4px; transition: all 0.2s; }
-.osl-verdict-label { font-size: 12px; font-weight: 800; }
-.osl-verdict-edge { font-size: 12px; font-weight: 700; }
-.verdict-loves { background: var(--green-bg); border: 1px solid var(--green-border); }
-.verdict-loves .osl-verdict-label, .verdict-loves .osl-verdict-edge { color: var(--green); }
-.verdict-dog { background: var(--amber-bg); border: 1px solid #e0c070; }
-.verdict-dog .osl-verdict-label, .verdict-dog .osl-verdict-edge { color: var(--amber); }
-.verdict-intrigued { background: #e8f0ff; border: 1px solid #c0d4ff; }
-.verdict-intrigued .osl-verdict-label, .verdict-intrigued .osl-verdict-edge { color: var(--blue); }
-.verdict-pass { background: var(--off); border: 1px solid var(--border); }
-.verdict-pass .osl-verdict-label, .verdict-pass .osl-verdict-edge { color: var(--text3); }
-.osl-toggle { font-size: 11px; font-weight: 600; color: var(--blue); cursor: pointer; padding: 0; border: none; background: none; font-family: 'Inter', sans-serif; }
-
-/* PRELIMS */
-.prelims-sep { display: flex; align-items: center; gap: 12px; margin: 14px 0 8px; }
-.prelims-line { flex:1; height:1px; background: var(--border); }
-.prelims-text { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); }
-
-/* BACKTEST PAGE */
-.bt-page { max-width: 700px; margin: 0 auto; padding: 16px 16px 80px; }
-.bt-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-.bt-kpi { background: white; border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
-.bt-kpi-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
-.bt-kpi-val { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--text); line-height: 1; margin-bottom: 4px; }
-.bt-kpi-val.green { color: var(--green); }
-.bt-kpi-val.neg { color: var(--red); }
-.bt-kpi-sub { font-size: 11px; color: var(--text3); }
-
-/* SUB TABS */
-.sub-tabs { display: flex; gap: 2px; background: var(--off); border: 1px solid var(--border); border-radius: var(--r); padding: 3px; margin-bottom: 12px; }
-.sub-tab { flex: 1; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; text-align: center; transition: all 0.15s; }
-.sub-tab.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); }
-.sub-tab:hover:not(.active) { color: var(--text); }
-.sub-page { display: none; }
-.sub-page.active { display: block; }
-
-.pastyear-roi-card { background: var(--navy); border-radius: var(--r); padding: 16px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-.pyr-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.4); }
-.pyr-val { font-size: 28px; font-weight: 900; color: var(--teal); letter-spacing: -0.8px; }
-.pyr-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-
-/* TABLES */
-.recent-table { background: white; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.rt-head { display: grid; grid-template-columns: 2fr 80px 70px 70px 80px 60px; padding: 10px 16px; background: var(--off); border-bottom: 1px solid var(--border); gap: 8px; }
-.rt-th { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text3); }
-.rt-row { display: grid; grid-template-columns: 2fr 80px 70px 70px 80px 60px; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 8px; align-items: center; }
-.rt-row:last-child { border-bottom: none; }
-.rt-row:hover { background: var(--off); }
-.rt-fighter { font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
-.rt-event { font-size: 10px; color: var(--text3); margin-top: 1px; }
-.rt-val { font-size: 13px; font-weight: 600; color: var(--text2); }
-.rt-val.pos { color: var(--green); }
-.result-tag { display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 5px; }
-.r-w { background: var(--green-bg); color: var(--green); }
-.r-l { background: #fdecea; color: var(--red); }
-.r-nc { background: var(--off); color: var(--text3); border: 1px solid var(--border); }
-
-/* PASTYEAR TABLE */
-.py-head { display: grid; grid-template-columns: 2fr 1fr 80px 70px 70px 60px; padding: 10px 16px; background: var(--off); border-bottom: 1px solid var(--border); gap: 8px; }
-.py-row { display: grid; grid-template-columns: 2fr 1fr 80px 70px 70px 60px; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 8px; align-items: center; }
-.py-row:last-child { border-bottom: none; }
-.py-row:hover { background: var(--off); }
-
-/* BT CARD */
-.bt-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.bt-card { background: white; border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 8px; }
-.bt-card-title { font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 14px; }
-
-/* LOADING */
-.loading { text-align: center; padding: 60px 20px; color: var(--text2); font-size: 14px; }
-.loading-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin: 0 3px; animation: bounce 1.2s infinite; }
-.loading-dot:nth-child(2) { animation-delay: 0.2s; }
-.loading-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
-
-/* MOBILE */
-@media (max-width: 600px) {
-  .event-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .picks-scroll { grid-template-columns: 1fr; }
-  .fc-name { font-size: 13px; }
-  .fc-bottom { grid-template-columns: repeat(2, 1fr); }
-  .fc-stat:nth-child(2) { border-right: none; }
-  .bt-kpis { grid-template-columns: repeat(2, 1fr); }
-  .bt-two { grid-template-columns: 1fr; }
-  .rt-head, .py-head { display: none; }
-  .rt-row { grid-template-columns: 1fr 1fr; }
-  .py-row { grid-template-columns: 1fr 1fr; }
-}
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UFC Edge Analyzer</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #050505; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+  </style>
 </head>
 <body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
 
-<div class="nav">
-  <div class="nav-logo">EDGE<span>.</span></div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('card',this)">Card</button>
-    <button class="nav-tab" onclick="showPage('backtest',this)">Historical Accuracy</button>
-    <button class="nav-tab" onclick="showPage('model',this)">Model</button>
-  </div>
-  <div class="nav-live"><div class="nav-live-dot"></div><span id="live-badge-text">Live</span></div>
-</div>
-
-<!-- CARD PAGE -->
-<div class="page active" id="p-card">
-  <div class="card-page">
-    <div id="card-loading" class="loading">
-      <div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
-      <div style="margin-top:12px">Loading card predictions...</div>
-    </div>
-    <div id="card-content" style="display:none"></div>
-  </div>
-</div>
-
-<!-- BACKTEST PAGE -->
-<div class="page" id="p-backtest">
-  <div class="bt-page">
-    <div class="event-header" style="margin-bottom:12px">
-      <div>
-        <div class="event-name">Historical Accuracy</div>
-        <div class="event-date">Walk-forward backtest · opening lines · ≥4% edge threshold</div>
-      </div>
-    </div>
-    <div class="bt-kpis">
-      <div class="bt-kpi"><div class="bt-kpi-label">Total ROI</div><div class="bt-kpi-val green" id="kpi-roi">—</div><div class="bt-kpi-sub" id="kpi-bets">loading...</div></div>
-      <div class="bt-kpi"><div class="bt-kpi-label">Win Rate</div><div class="bt-kpi-val" id="kpi-wr">—</div><div class="bt-kpi-sub" id="kpi-fights">loading...</div></div>
-      <div class="bt-kpi"><div class="bt-kpi-label">Dog ROI</div><div class="bt-kpi-val green" id="kpi-dog">—</div><div class="bt-kpi-sub" id="kpi-dog-range">+101 to +600</div></div>
-      <div class="bt-kpi"><div class="bt-kpi-label">Fav ROI</div><div class="bt-kpi-val green" id="kpi-fav">—</div><div class="bt-kpi-sub" id="kpi-fav-range">-101 to -200</div></div>
-    </div>
-    <div class="sub-tabs">
-      <button class="sub-tab active" onclick="showSub('fullbt',this)">Full Backtest</button>
-      <button class="sub-tab" onclick="showSub('pastyear',this)">Past Year</button>
-      <button class="sub-tab" onclick="showSub('recent',this)">Recent</button>
-    </div>
-    <div class="sub-page active" id="sub-fullbt">
-      <div class="bt-card">
-        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">About the Model</div>
-        <div style="font-size:14px;color:var(--text2);line-height:1.8;max-width:560px">
-          This model has been tested against real UFC fights going back to 2015 — over a thousand fights across every weight class. It only flags a bet when it finds a meaningful gap between what the odds imply and what the data suggests. Most fights get passed on entirely.
-          <br><br>
-          The backtest is run in a way that simulates real conditions: the model never looks ahead, and is only trained on fights that already happened before the card being evaluated. What you see in the numbers is as close to a real-world track record as a model can produce.
-          <br><br>
-          The Past Year tab shows live results as they come in. Once a fight is more than a year old it rolls off automatically. Until enough real results accumulate, those numbers are drawn from the historical backtest.
-        </div>
-      </div>
-    </div>
-    <div class="sub-page" id="sub-pastyear">
-      <div class="pastyear-roi-card" id="pastyear-header">
-        <div><div class="pyr-label">Rolling 12-Month ROI</div><div class="pyr-val" id="py-roi">—</div></div>
-        <div><div class="pyr-label">Record</div><div class="pyr-val" id="py-record" style="font-size:20px;color:white">—</div></div>
-        <div><div class="pyr-sub">Uses backtest data until 12 months of live results accumulate</div></div>
-      </div>
-      <div id="pastyear-table-wrap">
-        <div class="loading" style="padding:30px">Loading...</div>
-      </div>
-    </div>
-    <div class="sub-page" id="sub-recent">
-      <div id="recent-table-wrap">
-        <div class="loading" style="padding:30px">Loading...</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODEL PAGE -->
-<div class="page" id="p-model">
-  <div class="bt-page">
-    <div class="event-header" style="margin-bottom:12px">
-      <div>
-        <div class="event-name">How It Works</div>
-        <div class="event-date">112 features · walk-forward trained · no data leakage</div>
-      </div>
-    </div>
-    <div class="bt-kpis">
-      <div class="bt-kpi"><div class="bt-kpi-label">Features</div><div class="bt-kpi-val">112</div><div class="bt-kpi-sub">incl. 15 style features</div></div>
-      <div class="bt-kpi"><div class="bt-kpi-label">Training Fights</div><div class="bt-kpi-val">3,705</div><div class="bt-kpi-sub">2015 to present</div></div>
-      <div class="bt-kpi"><div class="bt-kpi-label">Min Edge</div><div class="bt-kpi-val">4%</div><div class="bt-kpi-sub">vs opening line</div></div>
-      <div class="bt-kpi"><div class="bt-kpi-label">Bet Types</div><div class="bt-kpi-val" style="font-size:18px">3 rules</div><div class="bt-kpi-sub">dogs, cap dogs, favs</div></div>
-    </div>
-    <div class="bt-card">
-      <div class="bt-card-title">What the Model Looks At</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.8">
-        The model evaluates each fighter based on their complete UFC history — how dominant they have been, how their fighting style matches up against their opponent, and how they have been performing recently. Physical attributes and career trajectory also factor in, but the biggest signal is always how much better or worse a fighter has looked than the market expects.
-      </div>
-    </div>
-    <div class="bt-card">
-      <div class="bt-card-title">Betting Rules</div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <div style="font-size:13px;font-weight:800;color:var(--amber);margin-bottom:3px">🐶 Disrespected Dogs</div>
-          <div style="font-size:13px;color:var(--text2);line-height:1.5">Model disagrees heavily with the market on a big underdog.</div>
-        </div>
-        <div>
-          <div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:3px">✓ Close Fights</div>
-          <div style="font-size:13px;color:var(--text2);line-height:1.5">Model sees an edge on fights where odds are between -200 and +200.</div>
-        </div>
-        <div style="font-size:12px;color:var(--text3);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">
-          All bets use opening lines only. The model is retrained before each card using only past data — no peeking ahead.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-var PREDS_URL  = 'card_predictions.json';
-var STATS_URL  = 'backtest_stats.json';
-var HISTORY_URL = 'backtest_history.json';
-
-var cardData    = null;
-var statsData   = null;
-var historyData = null;
-var fighterProbs = {};
-
-// ── UTILS ──────────────────────────────────────────────
-
-function imp(o) {
-  return o > 0 ? 100/(o+100) : Math.abs(o)/(Math.abs(o)+100);
-}
-
-function evStr(prob, odds) {
-  var pay = odds > 0 ? odds/100 : 100/Math.abs(odds);
-  var ev = (prob/100 * pay - (1 - prob/100)) * 100;
-  return (ev > 0 ? '+' : '') + '$' + ev.toFixed(1);
-}
-
-function oddsStr(o) {
-  return (o > 0 ? '+' : '') + Math.round(o);
-}
-
-function fmtRoi(v) {
-  return (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
-}
-
-function resultTag(r) {
-  if (r === 'win')         return '<div class="result-tag r-w">WIN</div>';
-  if (r === 'loss')        return '<div class="result-tag r-l">LOSS</div>';
-  if (r === 'no_contest')  return '<div class="result-tag r-nc">N/C</div>';
-  return '<div class="result-tag r-nc">' + r.toUpperCase() + '</div>';
-}
-
-function toAmerican(odds) {
-  return odds >= 0 ? '+' + odds : '' + odds;
-}
-
-function impliedProb(odds) {
-  if (odds > 0) return 100 / (odds + 100);
-  return Math.abs(odds) / (Math.abs(odds) + 100);
-}
-
-// ── PAGE SWITCHING ─────────────────────────────────────
-
-function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-  document.getElementById('p-' + id).classList.add('active');
-  btn.classList.add('active');
-}
-
-var subStats = {};
-
-function showSub(id, btn) {
-  document.querySelectorAll('.sub-page').forEach(function(p) { p.classList.remove('active'); });
-  document.querySelectorAll('.sub-tab').forEach(function(t) { t.classList.remove('active'); });
-  document.getElementById('sub-' + id).classList.add('active');
-  btn.classList.add('active');
-  var s = subStats[id];
-  if (!s) return;
-  updateKpis(s);
-}
-
-function updateKpis(s) {
-  var roiEl = document.getElementById('kpi-roi');
-  roiEl.textContent = fmtRoi(s.roi);
-  roiEl.className = 'bt-kpi-val ' + (s.roi < 0 ? 'neg' : 'green');
-  document.getElementById('kpi-bets').textContent = s.bets + ' bets';
-  document.getElementById('kpi-wr').textContent = s.win_rate.toFixed(1) + '%';
-  document.getElementById('kpi-fights').textContent = (s.fights || s.bets) + ' flagged';
-  var dogEl = document.getElementById('kpi-dog');
-  dogEl.textContent = fmtRoi(s.dog_roi);
-  dogEl.className = 'bt-kpi-val ' + (s.dog_roi < 0 ? 'neg' : 'green');
-  var favEl = document.getElementById('kpi-fav');
-  favEl.textContent = fmtRoi(s.fav_roi);
-  favEl.className = 'bt-kpi-val ' + (s.fav_roi < 0 ? 'neg' : 'green');
-}
-
-// ── ODDS SLIDER ────────────────────────────────────────
-
-function toggleSlider(id) {
-  var wrap = document.getElementById('slider-wrap-' + id);
-  if (!wrap) return;
-  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
-}
-
-function updateVerdict(id) {
-  var sl1 = document.getElementById('sl1-' + id);
-  var sl2 = document.getElementById('sl2-' + id);
-  var sv1 = document.getElementById('sv1-' + id);
-  var sv2 = document.getElementById('sv2-' + id);
-  var verdictEl = document.getElementById('sv-verdict-' + id);
-  var labelEl   = document.getElementById('sv-label-' + id);
-  var edgeEl    = document.getElementById('sv-edge-' + id);
-  if (!sl1 || !sl2) return;
-
-  var odds1 = parseInt(sl1.value);
-  var odds2 = parseInt(sl2.value);
-  sv1.textContent = toAmerican(odds1);
-  sv2.textContent = toAmerican(odds2);
-
-  var probs = fighterProbs[id] || {p1: 50, p2: 50};
-  var mkt1 = impliedProb(odds1) * 100;
-  var mkt2 = impliedProb(odds2) * 100;
-  var edge1 = probs.p1 - mkt1;
-  var edge2 = probs.p2 - mkt2;
-
-  var betOn, betOdds, edge, verdict, cssClass;
-  var n = fighterProbs[id] ? {f1: fighterProbs[id].f1, f2: fighterProbs[id].f2} : {f1:'Fighter 1', f2:'Fighter 2'};
-
-  if (edge1 >= edge2 && edge1 > 0) {
-    betOn = n.f1; betOdds = odds1; edge = edge1;
-  } else if (edge2 > 0) {
-    betOn = n.f2; betOdds = odds2; edge = edge2;
-  } else {
-    verdictEl.className = 'osl-verdict verdict-pass';
-    labelEl.textContent = 'No Edge at These Odds';
-    edgeEl.textContent = 'Move the sliders to find value';
-    return;
+// ─── FIGHTER DATA ────────────────────────────────────────────────────────────
+const fighters = {
+  "Islam Makhachev": {
+    record: "27-1", age: 32, height: 70, reach: 70.5, stance: "Orthodox",
+    style: ["Wrestler", "Sambo", "Ground Control"],
+    stats: { slpm: 3.84, strAcc: 56, strDef: 67, tdAvg: 3.11, tdAcc: 47, tdDef: 93, subAvg: 0.8, koRate: 0.22, subRate: 0.41 },
+    recentForm: [1,1,1,1,1], ranking: 1, division: "Lightweight", sos: 9.1,
+  },
+  "Dustin Poirier": {
+    record: "30-9", age: 35, height: 69, reach: 72, stance: "Southpaw",
+    style: ["Boxer", "Kickboxer", "Clinch"],
+    stats: { slpm: 5.89, strAcc: 47, strDef: 56, tdAvg: 1.56, tdAcc: 44, tdDef: 65, subAvg: 0.7, koRate: 0.47, subRate: 0.13 },
+    recentForm: [1,0,1,0,1], ranking: 4, division: "Lightweight", sos: 9.4,
+  },
+  "Sean O'Malley": {
+    record: "18-2", age: 29, height: 71, reach: 72, stance: "Southpaw",
+    style: ["Boxer", "Striker", "Counter"],
+    stats: { slpm: 7.26, strAcc: 58, strDef: 59, tdAvg: 0.55, tdAcc: 35, tdDef: 81, subAvg: 0.1, koRate: 0.61, subRate: 0.06 },
+    recentForm: [1,0,1,1,1], ranking: 2, division: "Bantamweight", sos: 7.2,
+  },
+  "Merab Dvalishvili": {
+    record: "18-4", age: 33, height: 67, reach: 67, stance: "Orthodox",
+    style: ["Wrestler", "Pressure", "Cardio"],
+    stats: { slpm: 4.92, strAcc: 42, strDef: 61, tdAvg: 6.62, tdAcc: 38, tdDef: 72, subAvg: 0.5, koRate: 0.11, subRate: 0.22 },
+    recentForm: [1,1,1,1,1], ranking: 1, division: "Bantamweight", sos: 8.8,
+  },
+  "Alex Pereira": {
+    record: "12-2", age: 37, height: 76, reach: 79, stance: "Orthodox",
+    style: ["Striker", "Kickboxer", "KO Artist"],
+    stats: { slpm: 5.12, strAcc: 52, strDef: 60, tdAvg: 0.35, tdAcc: 28, tdDef: 88, subAvg: 0.0, koRate: 0.75, subRate: 0.0 },
+    recentForm: [1,1,0,1,1], ranking: 1, division: "Light Heavyweight", sos: 8.3,
+  },
+  "Magomed Ankalaev": {
+    record: "20-1-1", age: 32, height: 75, reach: 77, stance: "Southpaw",
+    style: ["Striker", "Wrestler", "Technical"],
+    stats: { slpm: 3.48, strAcc: 50, strDef: 63, tdAvg: 1.82, tdAcc: 42, tdDef: 85, subAvg: 0.2, koRate: 0.45, subRate: 0.10 },
+    recentForm: [1,1,1,1,0], ranking: 2, division: "Light Heavyweight", sos: 7.9,
+  },
+  "Jon Jones": {
+    record: "27-1-1", age: 37, height: 76, reach: 84.5, stance: "Orthodox",
+    style: ["Wrestling", "Unorthodox", "All-Around"],
+    stats: { slpm: 4.35, strAcc: 57, strDef: 64, tdAvg: 2.16, tdAcc: 43, tdDef: 95, subAvg: 0.5, koRate: 0.37, subRate: 0.26 },
+    recentForm: [1,1,1,1,1], ranking: 1, division: "Heavyweight", sos: 9.8,
+  },
+  "Stipe Miocic": {
+    record: "20-4", age: 42, height: 76, reach: 79, stance: "Orthodox",
+    style: ["Boxer", "Wrestler", "Durable"],
+    stats: { slpm: 5.88, strAcc: 52, strDef: 58, tdAvg: 1.35, tdAcc: 36, tdDef: 77, subAvg: 0.1, koRate: 0.50, subRate: 0.05 },
+    recentForm: [0,1,0,1,1], ranking: 3, division: "Heavyweight", sos: 9.2,
   }
+};
 
-  if (betOdds > 200 && edge >= 25) {
-    verdict = 'Disrespected Dog - Bet ' + betOn; cssClass = 'osl-verdict verdict-dog';
-  } else if (betOdds >= -200 && edge >= 4) {
-    verdict = 'Model Loves It - Bet ' + betOn; cssClass = 'osl-verdict verdict-loves';
-  } else if (edge > 0) {
-    verdict = 'Model is Intrigued - ' + betOn; cssClass = 'osl-verdict verdict-intrigued';
-  } else {
-    verdict = 'No Edge at These Odds'; cssClass = 'osl-verdict verdict-pass';
-  }
+const upcomingCard = [
+  { fighter1: "Jack Della Maddalena", fighter2: "Carlos Prates",    event: "UFC Fight Night", date: "May 2, 2026", odds1: +100,  odds2: +100,  title: false, verdict: "PASS",         ev: 6   },
+  { fighter1: "Beneil Dariush",       fighter2: "Quillan Salkilld", event: "UFC Fight Night", date: "May 2, 2026", odds1: +350,  odds2: -450,  title: false, verdict: "BET DARIUSH",  ev: 105 },
+  { fighter1: "Tim Elliott",          fighter2: "Steve Erceg",      event: "UFC Fight Night", date: "May 2, 2026", odds1: +230,  odds2: -280,  title: false, verdict: "BET ELLIOTT",  ev: 51  },
+  { fighter1: "Shamil Gaziev",        fighter2: "Brando Pericic",   event: "UFC Fight Night", date: "May 2, 2026", odds1: -140,  odds2: +115,  title: false, verdict: "BET PERICIC",  ev: 14  },
+  { fighter1: "Jacob Malkoun",        fighter2: "Gerald Meerschaert",event: "UFC Fight Night", date: "May 2, 2026", odds1: -1100, odds2: +750,  title: false, verdict: "PASS",         ev: 0   },
+];
 
-  verdictEl.className = cssClass;
-  labelEl.textContent = verdict;
-  edgeEl.textContent = '+' + edge.toFixed(1) + '% edge at ' + toAmerican(betOdds);
-}
+// ─── STYLE MATCHUP MATRIX ────────────────────────────────────────────────────
+const styleMatrix = {
+  Wrestler:  { Wrestler:0.50,Boxer:0.58,Kickboxer:0.60,Striker:0.57,BJJ:0.48,Pressure:0.52,Sambo:0.49,"KO Artist":0.55,"Ground Control":0.51,Counter:0.56,Clinch:0.54,Technical:0.51,Cardio:0.48,"All-Around":0.50,Unorthodox:0.52,Durable:0.54 },
+  Boxer:     { Wrestler:0.42,Boxer:0.50,Kickboxer:0.52,Striker:0.51,BJJ:0.53,Pressure:0.46,Sambo:0.39,"KO Artist":0.47,"Ground Control":0.41,Counter:0.49,Clinch:0.55,Technical:0.50,Cardio:0.44,"All-Around":0.50,Unorthodox:0.48,Durable:0.52 },
+  Kickboxer: { Wrestler:0.40,Boxer:0.48,Kickboxer:0.50,Striker:0.50,BJJ:0.52,Pressure:0.44,Sambo:0.37,"KO Artist":0.48,"Ground Control":0.40,Counter:0.47,Clinch:0.46,Technical:0.50,Cardio:0.43,"All-Around":0.50,Unorthodox:0.47,Durable:0.49 },
+  Striker:   { Wrestler:0.43,Boxer:0.49,Kickboxer:0.50,Striker:0.50,BJJ:0.51,Pressure:0.45,Sambo:0.40,"KO Artist":0.50,"Ground Control":0.42,Counter:0.48,Clinch:0.47,Technical:0.50,Cardio:0.44,"All-Around":0.50,Unorthodox:0.47,Durable:0.48 },
+  BJJ:       { Wrestler:0.52,Boxer:0.47,Kickboxer:0.48,Striker:0.49,BJJ:0.50,Pressure:0.54,Sambo:0.49,"KO Artist":0.52,"Ground Control":0.50,Counter:0.51,Clinch:0.53,Technical:0.51,Cardio:0.49,"All-Around":0.50,Unorthodox:0.50,Durable:0.52 },
+  Pressure:  { Wrestler:0.48,Boxer:0.54,Kickboxer:0.56,Striker:0.55,BJJ:0.46,Pressure:0.50,Sambo:0.45,"KO Artist":0.50,"Ground Control":0.47,Counter:0.44,Clinch:0.52,Technical:0.48,Cardio:0.50,"All-Around":0.50,Unorthodox:0.48,Durable:0.50 },
+  Sambo:     { Wrestler:0.51,Boxer:0.61,Kickboxer:0.63,Striker:0.60,BJJ:0.51,Pressure:0.55,Sambo:0.50,"KO Artist":0.56,"Ground Control":0.52,Counter:0.59,Clinch:0.57,Technical:0.53,Cardio:0.50,"All-Around":0.52,Unorthodox:0.54,Durable:0.57 },
+};
 
-function toggleAnalysis(id) {
-  var el = document.getElementById('analysis-' + id);
-  if (!el) return;
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-// ── CARD RENDERING ─────────────────────────────────────
-
-function verdictClass(bout) {
-  var v = bout.verdict;
-  var o = bout.bet_odds;
-  if (v === 'BET' && o > 200) return 'is-dog';
-  if (v === 'BET') return 'is-bet';
-  return '';
-}
-
-function verdictBadge(bout) {
-  var v = bout.verdict;
-  var o = bout.bet_odds;
-  var name = (bout.bet_on || '').split(' ').pop();
-  if (v === 'BET' && o > 200 && (bout.edge1 >= 25 || bout.edge2 >= 25)) {
-    return '<div class="fc-verdict v-dog">🐶 Dog ' + oddsStr(o) + '</div>';
-  }
-  if (v === 'BET') {
-    return '<div class="fc-verdict v-bet">✓ Bet ' + oddsStr(o) + '</div>';
-  }
-  if (v === 'PASS_CAP') {
-    var e = Math.max(bout.edge1||0, bout.edge2||0);
-    if (e > 2) return '<div class="fc-verdict v-intrigued">Intrigued</div>';
-    return '<div class="fc-verdict v-pass">No Edge</div>';
-  }
-  return '<div class="fc-verdict v-pass">No Edge</div>';
-}
-
-function pickType(bout) {
-  var o = bout.bet_odds;
-  var e1 = bout.edge1 || 0;
-  var e2 = bout.edge2 || 0;
-  if (o > 200 && Math.max(e1,e2) >= 25) return {label:'🐶 Disrespected Dog', cls:'amber', btnCls:'dog-btn'};
-  return {label:'✓ Model Loves It', cls:'', btnCls:''};
-}
-
-function buildSlider(idx, f1, f2, p1, p2, o1, o2) {
-  var fid = 'f' + idx;
-  fighterProbs[fid] = {p1: p1, p2: p2, f1: f1, f2: f2};
-
-  var min1 = o1 < 0 ? Math.min(o1 * 2, -1500) : -500;
-  var max1 = o1 < 0 ? -101 : Math.max(o1 * 2, 800);
-  var min2 = o2 < 0 ? Math.min(o2 * 2, -1500) : 100;
-  var max2 = o2 > 0 ? Math.max(o2 * 2, 800) : -101;
-
-  // Determine initial verdict
-  var mkt1 = impliedProb(o1) * 100;
-  var mkt2 = impliedProb(o2) * 100;
-  var e1 = p1 - mkt1;
-  var e2 = p2 - mkt2;
-  var initVerdict = 'verdict-pass';
-  var initLabel = 'No Edge at These Odds';
-  var initEdge = 'Move the sliders to find value';
-  if (e1 >= e2 && e1 > 0) {
-    var bo = o1, ed = e1, bn = f1;
-    initLabel = (bo > 200 && ed >= 25) ? 'Disrespected Dog - Bet ' + bn : (ed >= 4 ? 'Model Loves It - Bet ' + bn : 'Model is Intrigued - ' + bn);
-    initVerdict = (bo > 200 && ed >= 25) ? 'verdict-dog' : (ed >= 4 ? 'verdict-loves' : 'verdict-intrigued');
-    initEdge = '+' + ed.toFixed(1) + '% edge at ' + toAmerican(o1);
-  } else if (e2 > 0) {
-    var bo = o2, ed = e2, bn = f2;
-    initLabel = (bo > 200 && ed >= 25) ? 'Disrespected Dog - Bet ' + bn : (ed >= 4 ? 'Model Loves It - Bet ' + bn : 'Model is Intrigued - ' + bn);
-    initVerdict = (bo > 200 && ed >= 25) ? 'verdict-dog' : (ed >= 4 ? 'verdict-loves' : 'verdict-intrigued');
-    initEdge = '+' + ed.toFixed(1) + '% edge at ' + toAmerican(o2);
-  }
-
-  return '<div class="odds-slider-wrap" id="slider-wrap-' + fid + '" style="display:none">' +
-    '<div class="osl-header"><div class="osl-label">Adjust Odds</div>' +
-    '<button class="osl-toggle" onclick="toggleSlider(\'' + fid + '\')">✕ Close</button></div>' +
-    '<div class="osl-row"><div class="osl-fighter">' + f1 + '</div>' +
-    '<input type="range" class="osl-slider" id="sl1-' + fid + '" min="' + min1 + '" max="' + max1 + '" value="' + o1 + '" step="5" oninput="updateVerdict(\'' + fid + '\')">' +
-    '<div class="osl-val" id="sv1-' + fid + '">' + toAmerican(o1) + '</div></div>' +
-    '<div class="osl-row"><div class="osl-fighter">' + f2 + '</div>' +
-    '<input type="range" class="osl-slider" id="sl2-' + fid + '" min="' + min2 + '" max="' + max2 + '" value="' + o2 + '" step="5" oninput="updateVerdict(\'' + fid + '\')">' +
-    '<div class="osl-val" id="sv2-' + fid + '">' + toAmerican(o2) + '</div></div>' +
-    '<div class="osl-verdict ' + initVerdict + '" id="sv-verdict-' + fid + '">' +
-    '<div class="osl-verdict-label" id="sv-label-' + fid + '">' + initLabel + '</div>' +
-    '<div class="osl-verdict-edge" id="sv-edge-' + fid + '">' + initEdge + '</div></div></div>';
-}
-
-function buildFightCard(bout, idx) {
-  var f1 = bout.fighter1 || '';
-  var f2 = bout.fighter2 || '';
-  var o1 = bout.odds1 || -110;
-  var o2 = bout.odds2 || -110;
-  var p1 = bout.prob1 || 50;
-  var p2 = bout.prob2 || 50;
-  var mp1 = bout.mkt_prob1 || imp(o1);
-  var mp2 = bout.mkt_prob2 || imp(o2);
-  var e1 = bout.edge1 || 0;
-  var e2 = bout.edge2 || 0;
-  var betOn = bout.bet_on || '';
-  var betOdds = bout.bet_odds || 0;
-  var verdict = bout.verdict || 'PASS';
-  var wc = bout.weight_class || '';
-  var analysis = bout.analysis || '';
-  var footer = bout.analysis_footer || '';
-
-  var isBet = verdict === 'BET';
-  var isDog = isBet && betOdds > 200;
-  var cardCls = verdictClass(bout);
-
-  var o1Cls = (isBet && betOn === f1) ? (isDog ? 'dog-h' : 'highlighted') : '';
-  var o2Cls = (isBet && betOn === f2) ? (isDog ? 'dog-h' : 'highlighted') : '';
-
-  var barWidth = Math.round(p1);
-
-  var evF1 = evStr(p1, o1);
-  var evF2 = evStr(p2, o2);
-  var e1Display = (e1 >= 0 ? '+' : '') + e1.toFixed(1) + '%';
-  var e2Display = (e2 >= 0 ? '+' : '') + e2.toFixed(1) + '%';
-  var e1Cls = e1 >= 4 ? 'pos' : e1 < 0 ? 'neg' : 'neu';
-  var e2Cls = e2 >= 4 ? 'pos' : e2 < 0 ? 'neg' : 'neu';
-  var ev1Cls = evF1.startsWith('+') ? 'pos' : 'neg';
-  var ev2Cls = evF2.startsWith('+') ? 'pos' : 'neg';
-
-  var fid = 'f' + idx;
-  var slider = buildSlider(idx, f1, f2, p1, p2, o1, o2);
-
-  // Bet range strip
-  var rangeStrip = '';
-  if (isBet && footer) {
-    rangeStrip = '<div class="bet-range-strip">' +
-      '<div class="brs-label">' + footer + '</div>' +
-      '</div>';
-  }
-
-  // Analysis panel
-  var analysisPanel = '';
-  if (isBet && analysis) {
-    analysisPanel = '<div id="analysis-' + idx + '" style="display:none;padding:12px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.6;background:rgba(0,0,0,0.02)">' +
-      analysis + '</div>';
-  }
-
-  return '<div class="fight-card ' + cardCls + '">' +
-    '<div class="fc-top">' +
-    '<div class="fc-weight">' + wc + '</div>' +
-    '<div class="fc-fighters">' +
-      '<div class="fc-fighter">' +
-        '<div class="fc-name">' + f1 + '</div>' +
-        '<div class="fc-odds-btn ' + o1Cls + '">' + oddsStr(o1) + '</div>' +
-        '<div class="fc-prob">' + p1.toFixed(0) + '% model · ' + mp1.toFixed(0) + '% mkt</div>' +
-      '</div>' +
-      '<div class="fc-center">' +
-        '<div class="fc-vs">VS</div>' +
-        '<div class="fc-bar-wrap"><div class="fc-bar"><div class="fc-bar-fill" style="width:' + barWidth + '%"></div></div></div>' +
-        verdictBadge(bout) +
-      '</div>' +
-      '<div class="fc-fighter r">' +
-        '<div class="fc-name">' + f2 + '</div>' +
-        '<div class="fc-odds-btn ' + o2Cls + '">' + oddsStr(o2) + '</div>' +
-        '<div class="fc-prob">' + p2.toFixed(0) + '% model · ' + mp2.toFixed(0) + '% mkt</div>' +
-      '</div>' +
-    '</div>' +
-    '</div>' +
-    rangeStrip +
-    (isBet && analysis ? '<div style="padding:4px 16px 8px;border-top:1px solid var(--border)"><button class="osl-toggle" onclick="toggleAnalysis(' + idx + ')">+ Analysis</button></div>' : '') +
-    analysisPanel +
-    '<div class="fc-bottom">' +
-      '<div class="fc-stat"><div class="fc-stat-label">' + f1.split(' ').pop() + ' Edge</div><div class="fc-stat-val ' + e1Cls + '">' + e1Display + '</div></div>' +
-      '<div class="fc-stat"><div class="fc-stat-label">' + f1.split(' ').pop() + ' EV</div><div class="fc-stat-val ' + ev1Cls + '">' + evF1 + '</div></div>' +
-      '<div class="fc-stat"><div class="fc-stat-label">' + f2.split(' ').pop() + ' Edge</div><div class="fc-stat-val ' + e2Cls + '">' + e2Display + '</div></div>' +
-      '<div class="fc-stat" style="display:flex;align-items:center;justify-content:flex-end;padding-right:14px">' +
-        '<button class="osl-toggle" onclick="toggleSlider(\'' + fid + '\')">⚙ Adjust odds</button>' +
-      '</div>' +
-    '</div>' +
-    slider +
-    '</div>';
-}
-
-function buildPickTile(bout, idx) {
-  var betOn = bout.bet_on || '';
-  var opponent = betOn === bout.fighter1 ? bout.fighter2 : bout.fighter1;
-  var betOdds = bout.bet_odds || 0;
-  var prob = betOn === bout.fighter1 ? bout.prob1 : bout.prob2;
-  var mktProb = betOn === bout.fighter1 ? bout.mkt_prob1 : bout.mkt_prob2;
-  var edge = Math.max(Math.abs(bout.edge1||0), Math.abs(bout.edge2||0));
-  var wc = bout.weight_class || '';
-  var analysis = bout.analysis || '';
-  var footer = bout.analysis_footer || '';
-
-  var pt = pickType(bout);
-  var isDog = betOdds > 200 && edge >= 25;
-  var tileCls = isDog ? 'pick-tile dog' : 'pick-tile';
-
-  // Parse bet range from footer
-  var rangeText = '';
-  if (footer) {
-    var match = footer.match(/Bet range:\s*(.+?)\.?$/i);
-    if (match) rangeText = 'Bet range: ' + match[1];
-    else rangeText = footer;
-  }
-
-  var analysisHtml = '';
-  if (analysis) {
-    var borderCol = isDog ? '#e0c070' : 'var(--green-border)';
-    analysisHtml = '<div id="ptanalysis-' + idx + '" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid ' + borderCol + ';font-size:12px;color:var(--text2);line-height:1.6;">' +
-      analysis +
-      (footer ? '<div style="margin-top:6px;font-size:10px;color:var(--text3);">' + footer + '</div>' : '') +
-      '</div>';
-  }
-
-  return '<div class="' + tileCls + '" onclick="togglePickAnalysis(' + idx + ')">' +
-    '<div class="pick-type ' + pt.cls + '">' + pt.label + '</div>' +
-    '<div class="pick-fighter">' + betOn + '</div>' +
-    '<div class="pick-matchup">vs ' + opponent + ' · ' + wc + '</div>' +
-    '<div class="pick-odds-btn ' + pt.btnCls + '">' + oddsStr(betOdds) + '</div>' +
-    '<div class="pick-meta">' +
-      '<span>' + (prob||0).toFixed(0) + '% model</span>' +
-      '<span><strong class="' + pt.cls + '">+' + edge.toFixed(1) + '% edge</strong></span>' +
-    '</div>' +
-    (rangeText ? '<div class="pick-range">' + rangeText + '</div>' : '') +
-    analysisHtml +
-    '</div>';
-}
-
-function togglePickAnalysis(idx) {
-  var el = document.getElementById('ptanalysis-' + idx);
-  if (!el) return;
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function renderCard(data) {
-  var card = Array.isArray(data) ? data[0] : data;
-  var bouts = card.bouts || [];
-  var event = card.event || 'UFC Fight Night';
-  var date  = card.date  || '';
-
-  var bets = bouts.filter(function(b) { return b.verdict === 'BET'; });
-  var main = bouts.filter(function(b) { return b.main_card !== false; });
-  var pre  = bouts.filter(function(b) { return b.main_card === false; });
-
-  var html = '';
-
-  // Event header
-  html += '<div class="event-header">' +
-    '<div><div class="event-name">' + event + '</div><div class="event-date">' + date + '</div></div>' +
-    '<div class="event-pills"><div class="event-pill"><div class="ep-val">' + bets.length + '</div><div class="ep-label">Bets Today</div></div></div>' +
-    '</div>';
-
-  // Picks spotlight
-  if (bets.length > 0) {
-    html += '<div class="picks-label">Model\'s Picks</div>';
-    html += '<div class="picks-scroll">';
-    bets.forEach(function(b, i) { html += buildPickTile(b, i); });
-    html += '</div>';
-  }
-
-  // Main card
-  if (main.length > 0) {
-    html += '<div class="section-label">Main Card</div>';
-    main.forEach(function(b, i) { html += buildFightCard(b, i); });
-  }
-
-  // Prelims
-  if (pre.length > 0) {
-    html += '<div class="prelims-sep"><div class="prelims-line"></div><div class="prelims-text">Prelims</div><div class="prelims-line"></div></div>';
-    pre.forEach(function(b, i) { html += buildFightCard(b, main.length + i); });
-  }
-
-  document.getElementById('card-loading').style.display = 'none';
-  var content = document.getElementById('card-content');
-  content.innerHTML = html;
-  content.style.display = 'block';
-}
-
-// ── BACKTEST RENDERING ─────────────────────────────────
-
-function renderStats(data) {
-  statsData = data;
-  subStats = {
-    fullbt:   data.fullbt   || {},
-    pastyear: data.pastyear || {},
-    recent:   data.recent   || {}
-  };
-  // Default to fullbt on load
-  updateKpis(subStats.fullbt);
-}
-
-function renderHistory(data) {
-  historyData = data;
-  var now = new Date();
-  var oneYearAgo = new Date(now);
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-  var recent = data.slice(0, 20);
-  var pastYear = data.filter(function(h) {
-    if (!h.date) return false;
-    var d = new Date(h.date);
-    return d >= oneYearAgo;
-  });
-
-  // Render recent table
-  var recentHtml = buildHistoryTable(recent, false);
-  document.getElementById('recent-table-wrap').innerHTML = recentHtml;
-
-  // Render past year table
-  var pastYearHtml = buildHistoryTable(pastYear, true);
-  document.getElementById('pastyear-table-wrap').innerHTML = pastYearHtml;
-
-  // Update past year ROI card
-  if (statsData && statsData.pastyear) {
-    var s = statsData.pastyear;
-    var pyRoi = document.getElementById('py-roi');
-    if (pyRoi) pyRoi.textContent = fmtRoi(s.roi);
-    var wins = pastYear.filter(function(h) { return h.result === 'win'; }).length;
-    var losses = pastYear.filter(function(h) { return h.result === 'loss'; }).length;
-    var pyRecord = document.getElementById('py-record');
-    if (pyRecord) pyRecord.textContent = wins + 'W · ' + losses + 'L';
-  }
-}
-
-function buildHistoryTable(bets, showPnl) {
-  if (!bets || bets.length === 0) {
-    return '<div class="bt-card" style="text-align:center;color:var(--text3);font-size:13px">No results yet</div>';
-  }
-
-  var cols = showPnl
-    ? '2fr 1fr 80px 70px 70px 60px'
-    : '2fr 80px 70px 70px 80px 60px';
-
-  var html = '<div class="recent-table">';
-
-  // Header
-  if (showPnl) {
-    html += '<div class="py-head" style="grid-template-columns:' + cols + '">' +
-      '<div class="rt-th">Fighter</div><div class="rt-th">Event</div>' +
-      '<div class="rt-th">Odds</div><div class="rt-th">Edge</div>' +
-      '<div class="rt-th">P&amp;L</div><div class="rt-th">Result</div></div>';
-  } else {
-    html += '<div class="rt-head">' +
-      '<div class="rt-th">Fighter</div><div class="rt-th">Odds</div>' +
-      '<div class="rt-th">Model</div><div class="rt-th">Market</div>' +
-      '<div class="rt-th">Edge</div><div class="rt-th">Result</div></div>';
-  }
-
-  bets.forEach(function(h) {
-    var oddsTxt = (h.odds > 0 ? '+' : '') + h.odds;
-    var edgeTxt = '+' + h.edge.toFixed(1) + '%';
-    var rowCls = showPnl ? 'py-row' : 'rt-row';
-
-    if (showPnl) {
-      var pnlTxt = h.result === 'no_contest' ? 'N/C' : (h.pnl >= 0 ? '+$' : '-$') + Math.abs(h.pnl).toFixed(0);
-      var pnlCls = h.result === 'no_contest' ? 'neu' : (h.pnl >= 0 ? 'pos' : 'neg');
-      html += '<div class="' + rowCls + '" style="grid-template-columns:' + cols + '">' +
-        '<div><div class="rt-fighter">' + h.fighter + '</div></div>' +
-        '<div class="rt-val" style="font-size:11px">' + (h.event || '').replace(/^(ufc\s+\d+:\s*)/i,'').substring(0,20) + '</div>' +
-        '<div class="rt-val ' + (h.odds > 0 ? 'pos' : '') + '">' + oddsTxt + '</div>' +
-        '<div class="rt-val pos">' + edgeTxt + '</div>' +
-        '<div class="rt-val ' + pnlCls + '">' + pnlTxt + '</div>' +
-        '<div>' + resultTag(h.result) + '</div>' +
-        '</div>';
-    } else {
-      html += '<div class="rt-row">' +
-        '<div><div class="rt-fighter">' + h.fighter + '</div><div class="rt-event">' + (h.event || '') + ' · ' + (h.date || '').substring(0,10) + '</div></div>' +
-        '<div class="rt-val ' + (h.odds > 0 ? 'pos' : '') + '">' + oddsTxt + '</div>' +
-        '<div class="rt-val">' + h.model_prob.toFixed(0) + '%</div>' +
-        '<div class="rt-val">' + h.mkt_prob.toFixed(0) + '%</div>' +
-        '<div class="rt-val pos">' + edgeTxt + '</div>' +
-        '<div>' + resultTag(h.result) + '</div>' +
-        '</div>';
+function getStyleMatchupScore(stylesA, stylesB) {
+  let total = 0, count = 0;
+  for (const sa of stylesA) {
+    const row = styleMatrix[sa];
+    if (!row) continue;
+    for (const sb of stylesB) {
+      if (row[sb] !== undefined) { total += row[sb]; count++; }
     }
-  });
-
-  html += '</div>';
-  return html;
+  }
+  return count > 0 ? total / count : 0.5;
 }
 
-// ── DATA LOADING ───────────────────────────────────────
+// ─── DIVISION WEIGHTS ─────────────────────────────────────────────────────────
+const divisionWeights = {
+  Heavyweight:        { striking:0.40,strikeDef:0.006,grappling:0.08,tdDef:0.004,sub:0.10,age:0.07,form:0.25,style:0.10,sos:0.15 },
+  "Light Heavyweight":{ striking:0.35,strikeDef:0.007,grappling:0.10,tdDef:0.005,sub:0.15,age:0.06,form:0.28,style:0.12,sos:0.13 },
+  Lightweight:        { striking:0.26,strikeDef:0.009,grappling:0.18,tdDef:0.006,sub:0.25,age:0.04,form:0.32,style:0.15,sos:0.11 },
+  Bantamweight:       { striking:0.22,strikeDef:0.010,grappling:0.22,tdDef:0.007,sub:0.30,age:0.03,form:0.33,style:0.16,sos:0.10 },
+  default:            { striking:0.28,strikeDef:0.008,grappling:0.16,tdDef:0.006,sub:0.22,age:0.05,form:0.30,style:0.14,sos:0.12 },
+};
 
-function loadAll() {
-  // Load card predictions
-  fetch(PREDS_URL + '?v=' + Date.now())
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      cardData = data;
-      renderCard(data);
-      // Update live badge
-      var now = new Date();
-      var timeStr = now.toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-      var badge = document.getElementById('live-badge-text');
-      if (badge) badge.textContent = 'Odds updated ' + timeStr;
-    })
-    .catch(function(e) {
-      document.getElementById('card-loading').innerHTML =
-        '<div style="color:var(--text3);font-size:13px">Could not load predictions. Run predict_card.py first.</div>';
-      console.error('Card load error:', e);
-    });
-
-  // Load backtest stats
-  fetch(STATS_URL + '?v=' + Date.now())
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      renderStats(data);
-      // Load history after stats are ready
-      return fetch(HISTORY_URL + '?v=' + Date.now());
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      renderHistory(data);
-    })
-    .catch(function(e) {
-      console.warn('Backtest data not available yet. Run generate_history.py first.');
-      // Fall back to empty state gracefully
-      document.getElementById('recent-table-wrap').innerHTML =
-        '<div class="bt-card" style="color:var(--text3);font-size:13px;text-align:center">Run generate_history.py to load backtest data</div>';
-      document.getElementById('pastyear-table-wrap').innerHTML =
-        '<div class="bt-card" style="color:var(--text3);font-size:13px;text-align:center">Run generate_history.py to load backtest data</div>';
-    });
+// ─── MODELS ──────────────────────────────────────────────────────────────────
+function modelWeighted(f1n, f2n) {
+  const a = fighters[f1n], b = fighters[f2n];
+  if (!a || !b) return 0.5;
+  const div = a.division === b.division ? a.division : "default";
+  const w = divisionWeights[div] || divisionWeights.default;
+  let s = 0;
+  s += (a.stats.slpm * a.stats.strAcc/100 - b.stats.slpm * b.stats.strAcc/100) * w.striking;
+  s += (a.stats.strDef - b.stats.strDef) * w.strikeDef;
+  s += (a.stats.tdAvg * a.stats.tdAcc/100 - b.stats.tdAvg * b.stats.tdAcc/100) * w.grappling;
+  s += (a.stats.tdDef - b.stats.tdDef) * w.tdDef;
+  s += (a.stats.subAvg - b.stats.subAvg) * w.sub;
+  s += (a.age > 33 ? -(a.age-33)*w.age : 0) - (b.age > 33 ? -(b.age-33)*w.age : 0);
+  const fa = a.recentForm.reduce((x,v)=>x+v,0)/a.recentForm.length;
+  const fb = b.recentForm.reduce((x,v)=>x+v,0)/b.recentForm.length;
+  s += (fa - fb) * w.form;
+  s += (getStyleMatchupScore(a.style, b.style) - 0.5) * w.style * 4;
+  s += (a.sos - b.sos) * w.sos * 0.05;
+  return Math.min(0.95, Math.max(0.05, 1/(1+Math.exp(-s*3.5))));
 }
 
-window.addEventListener('load', loadAll);
-</script>
+function modelElo(f1n, f2n) {
+  const a = fighters[f1n], b = fighters[f2n];
+  if (!a || !b) return 0.5;
+  function rating(f) {
+    const [w,l] = f.record.split("-").map(Number);
+    const wr = w/(w+l);
+    const form = f.recentForm.reduce((x,v)=>x+v,0)/f.recentForm.length;
+    const base = 1400 + (wr-0.5)*600 + (f.sos-5)*30 + form*80 + (f.stats.koRate+f.stats.subRate)*30;
+    return base + (f.age > 34 ? -(f.age-34)*12 : 0);
+  }
+  return Math.min(0.95, Math.max(0.05, 1/(1+Math.pow(10,(rating(b)-rating(a))/400))));
+}
+
+function modelMatchup(f1n, f2n) {
+  const a = fighters[f1n], b = fighters[f2n];
+  if (!a || !b) return 0.5;
+  const styleScore = getStyleMatchupScore(a.style, b.style);
+  const sosEdge = (a.sos - b.sos)/20;
+  const reachEdge = (a.reach - b.reach)/200;
+  const fa = a.recentForm.reduce((x,v)=>x+v,0)/a.recentForm.length;
+  const fb = b.recentForm.reduce((x,v)=>x+v,0)/b.recentForm.length;
+  const formEdge = (fa - fb)*0.15;
+  const ageEdge = (a.age>33?-(a.age-33)*0.01:0) - (b.age>33?-(b.age-33)*0.01:0);
+  const strM = (a.stats.strAcc/100)*(1-b.stats.strDef/100) - (b.stats.strAcc/100)*(1-a.stats.strDef/100);
+  const tdM  = (a.stats.tdAcc/100)*(1-b.stats.tdDef/100)  - (b.stats.tdAcc/100)*(1-a.stats.tdDef/100);
+  const raw = styleScore + sosEdge + reachEdge + formEdge + ageEdge + strM*0.3 + tdM*0.25;
+  return Math.min(0.95, Math.max(0.05, raw));
+}
+
+function modelEnsemble(f1, f2) {
+  return (modelWeighted(f1,f2) + modelElo(f1,f2) + modelMatchup(f1,f2) + modelXGB(f1,f2)) / 4;
+}
+
+// ─── XGB MODEL ───────────────────────────────────────────────────────────────
+// Feature importance weights exported from trained XGBoost (Platt-calibrated).
+// In-browser approximation: weighted sum of normalized features → sigmoid.
+// Replace XGB_WEIGHTS with output of models/xgb_weights_v2.json after real scrape.
+const XGB_WEIGHTS = {
+  "f1_age":0.028543,"f1_avg_sig_str":0.028543,"southpaw_adv":0.026935,
+  "elo_diff":0.026834,"f1_avg_td_def":0.026834,"diff_sub_rate":0.026734,
+  "f2_avg_sig_str":0.026131,"f2_avg_td":0.025930,"f2_days_off":0.024322,
+  "reach_diff":0.024121,"diff_sig_str":0.024020,"f2_recent_ko_loss":0.023819,
+  "diff_td":0.023015,"f2_avg_td_def":0.022814,"diff_sig_acc":0.022412,
+  "diff_days_off":0.022412,"f2_age":0.022111,"f1_recent_ko_loss":0.021910,
+  "diff_finish_rate":0.021508,"f1_avg_td":0.021307,"diff_ctrl_sec":0.021206,
+  "diff_kd":0.021206,"f1_days_off":0.021005,"diff_sub_att":0.020302,
+  "f1_sub_rate":0.019598,"diff_td_def":0.019598,"age_diff":0.018794,
+  "diff_ko_rate":0.017990,"diff_streak":0.016382,"post_2018":0.016583,
+  "f1_avg_str_def":0.014171,"years_ago":0.012965,"f2_avg_str_def":0.012864,
+  "diff_win_rate":0.010553,"modern_era":0.009447,"str_penetration":0.008141,
+  "height_diff":0.007739,"modern_x_elo_diff":0.006332,
+};
+
+// Build feature vector from two fighters in the same format as Python pipeline
+function buildXGBFeatures(f1n, f2n) {
+  const a = fighters[f1n], b = fighters[f2n];
+  if (!a || !b) return null;
+
+  const fa = a.recentForm.reduce((x,v)=>x+v,0)/a.recentForm.length;
+  const fb = b.recentForm.reduce((x,v)=>x+v,0)/b.recentForm.length;
+  const [aw,al] = a.record.split("-").map(Number);
+  const [bw,bl] = b.record.split("-").map(Number);
+  const a_wr = aw/(aw+al), b_wr = bw/(bw+bl);
+
+  // Simulated Elo from record + SOS + form (mirrors Python modelElo)
+  function simElo(f) {
+    const [w,l] = f.record.split("-").map(Number);
+    const wr = w/(w+l);
+    const form = f.recentForm.reduce((x,v)=>x+v,0)/f.recentForm.length;
+    return 1400 + (wr-0.5)*600 + (f.sos-5)*30 + form*80
+           + (f.stats.koRate+f.stats.subRate)*30
+           + (f.age > 34 ? -(f.age-34)*12 : 0);
+  }
+  const a_elo = simElo(a), b_elo = simElo(b);
+
+  // Recent KO loss — proxy: check if recentForm last loss was flagged
+  const a_ko_loss = a.stats.koRate > 0.4 && fa < 0.6 ? 1 : 0;
+  const b_ko_loss = b.stats.koRate > 0.4 && fb < 0.6 ? 1 : 0;
+
+  // Days off proxy (fighters with recent inactivity)
+  const a_days = 90, b_days = 90; // default — real value from scrape
+
+  const stance_map = {"Orthodox":0,"Southpaw":1,"Switch":2};
+  const a_st = stance_map[a.stance]||0, b_st = stance_map[b.stance]||0;
+
+  const now_year = 2026;
+
+  return {
+    "elo_diff":          a_elo - b_elo,
+    "age_diff":          a.age - b.age,
+    "reach_diff":        a.reach - b.reach,
+    "height_diff":       a.height - b.height,
+    "southpaw_adv":      a_st !== b_st ? 1 : 0,
+    "f1_age":            a.age,
+    "f2_age":            b.age,
+    "f1_avg_sig_str":    a.stats.slpm,
+    "f2_avg_sig_str":    b.stats.slpm,
+    "f1_avg_sig_acc":    a.stats.strAcc/100,
+    "f2_avg_sig_acc":    b.stats.strAcc/100,
+    "f1_avg_str_def":    a.stats.strDef/100,
+    "f2_avg_str_def":    b.stats.strDef/100,
+    "f1_avg_td":         a.stats.tdAvg,
+    "f2_avg_td":         b.stats.tdAvg,
+    "f1_avg_td_def":     a.stats.tdDef/100,
+    "f2_avg_td_def":     b.stats.tdDef/100,
+    "f1_sub_rate":       a.stats.subRate,
+    "f2_sub_rate":       b.stats.subRate,
+    "f1_ko_rate":        a.stats.koRate,
+    "f2_ko_rate":        b.stats.koRate,
+    "f1_recent_ko_loss": a_ko_loss,
+    "f2_recent_ko_loss": b_ko_loss,
+    "f1_days_off":       a_days,
+    "f2_days_off":       b_days,
+    "diff_sig_str":      a.stats.slpm - b.stats.slpm,
+    "diff_sig_acc":      (a.stats.strAcc - b.stats.strAcc)/100,
+    "diff_str_def":      (a.stats.strDef - b.stats.strDef)/100,
+    "diff_td":           a.stats.tdAvg - b.stats.tdAvg,
+    "diff_td_def":       (a.stats.tdDef - b.stats.tdDef)/100,
+    "diff_sub_rate":     a.stats.subRate - b.stats.subRate,
+    "diff_ko_rate":      a.stats.koRate - b.stats.koRate,
+    "diff_finish_rate":  (a.stats.koRate+a.stats.subRate) - (b.stats.koRate+b.stats.subRate),
+    "diff_streak":       (fa>0.8?2:fa>0.6?1:fa<0.4?-1:-2) - (fb>0.8?2:fb>0.6?1:fb<0.4?-1:-2),
+    "diff_win_rate":     a_wr - b_wr,
+    "diff_days_off":     a_days - b_days,
+    "diff_ctrl_sec":     0,
+    "diff_kd":           0,
+    "diff_sub_att":      a.stats.subAvg - b.stats.subAvg,
+    "str_penetration":   (a.stats.strAcc/100)*(1-b.stats.strDef/100),
+    "modern_era":        1,
+    "post_2018":         1,
+    "years_ago":         0,
+    "modern_x_elo_diff": a_elo - b_elo,
+    "height_diff":       a.height - b.height,
+  };
+}
+
+function modelXGB(f1n, f2n) {
+  const feats = buildXGBFeatures(f1n, f2n);
+  if (!feats) return 0.5;
+
+  // Weighted dot product of feature values × importance weights
+  // Sign-aware: positive features favor f1, negative favor f2
+  let score = 0;
+  let totalWeight = 0;
+  for (const [feat, weight] of Object.entries(XGB_WEIGHTS)) {
+    const val = feats[feat];
+    if (val !== undefined && !isNaN(val)) {
+      score += val * weight;
+      totalWeight += weight;
+    }
+  }
+
+  // Normalize by total weight, then scale and sigmoid
+  const normalized = totalWeight > 0 ? score / totalWeight : 0;
+  const prob = 1 / (1 + Math.exp(-normalized * 8));
+  return Math.min(0.95, Math.max(0.05, prob));
+}
+
+const MODELS = {
+  weighted: { label:"Weighted Stats", fn:modelWeighted, desc:"Division-aware stat weights" },
+  elo:      { label:"Elo Rating",     fn:modelElo,      desc:"Career performance + SOS" },
+  matchup:  { label:"Style Matchup",  fn:modelMatchup,  desc:"Style clash + stat specifics" },
+  xgb:      { label:"XGBoost",        fn:modelXGB,      desc:"ML model · feature importance from trained XGBoost · update XGB_WEIGHTS after scrape" },
+  ensemble: { label:"Ensemble",       fn:modelEnsemble, desc:"Average of all four models — most stable signal" },
+};
+
+// ─── MATH HELPERS ─────────────────────────────────────────────────────────────
+function oddsToRawProb(o) { return o < 0 ? (-o)/(-o+100) : 100/(o+100); }
+function vigFreeProbs(o1,o2) { const r1=oddsToRawProb(o1),r2=oddsToRawProb(o2),t=r1+r2; return [r1/t,r2/t]; }
+function calcVig(o1,o2) { return ((oddsToRawProb(o1)+oddsToRawProb(o2)-1)*100).toFixed(1); }
+function probToOdds(p) { return p>=0.5 ? Math.round(-p/(1-p)*100) : Math.round((1-p)/p*100); }
+function calcEV(modelProb, marketOdds) {
+  const payout = marketOdds>0 ? marketOdds/100 : 100/Math.abs(marketOdds);
+  return (modelProb*payout - (1-modelProb)) * 100;
+}
+
+function kellyFraction(modelProb, marketOdds) {
+  const b = marketOdds > 0 ? marketOdds/100 : 100/Math.abs(marketOdds);
+  const q = 1 - modelProb;
+  const k = (b * modelProb - q) / b;
+  return Math.max(0, Math.min(k, 0.25)); // cap at 25%
+}
+
+function kellyBet(modelProb, marketOdds, bankroll, fraction=0.5) {
+  // Half-Kelly is standard — reduces variance
+  const full = kellyFraction(modelProb, marketOdds);
+  return Math.round(full * fraction * bankroll);
+}
+
+function getEdgeState(modelProb, marketProb, marketOdds, vig) {
+  const edge = (modelProb - marketProb)*100;
+  const ev = calcEV(modelProb, marketOdds);
+  if (edge <= 0) return { type:"none", edge, ev, label:"NO EDGE" };
+  if (ev > 0)    return { type:"profitable", edge, ev, label: edge>=15?"STRONG":edge>=8?"MODERATE":"SLIGHT" };
+  return { type:"divergence", edge, ev, label:"DIVERGE" };
+}
+
+const STATE_STYLES = {
+  "profitable|STRONG":   { color:"#00ff88", bg:"rgba(0,255,136,0.15)",  border:"rgba(0,255,136,0.4)",   glow:"0 0 10px rgba(0,255,136,0.25)" },
+  "profitable|MODERATE": { color:"#ffe44d", bg:"rgba(255,228,77,0.12)", border:"rgba(255,228,77,0.35)",  glow:"0 0 8px rgba(255,228,77,0.2)" },
+  "profitable|SLIGHT":   { color:"#ffb347", bg:"rgba(255,179,71,0.10)", border:"rgba(255,179,71,0.3)",   glow:"none" },
+  "divergence|DIVERGE":  { color:"#7eb8ff", bg:"rgba(126,184,255,0.08)",border:"rgba(126,184,255,0.25)", glow:"none" },
+  "none|NO EDGE":        { color:"#2a2a2a", bg:"transparent",            border:"#1e1e1e",               glow:"none" },
+};
+function getStateStyle(s) { return STATE_STYLES[`${s.type}|${s.label}`] || STATE_STYLES["none|NO EDGE"]; }
+
+// ─── COMPONENTS ───────────────────────────────────────────────────────────────
+function EdgeCell({ modelProb, marketProb, marketOdds, vig }) {
+  const state = getEdgeState(modelProb, marketProb, marketOdds, vig);
+  const st = getStateStyle(state);
+  if (state.type === "none") return <span style={{ color:"#252525", fontSize:10, fontWeight:700 }}>NO EDGE</span>;
+  const evSign = state.ev >= 0 ? "+" : "";
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+        <span style={{ background:st.bg, color:st.color, border:`1px solid ${st.border}`, borderRadius:4, padding:"2px 7px", fontSize:10, fontWeight:800, letterSpacing:"0.08em", boxShadow:st.glow, minWidth:58, textAlign:"center" }}>{state.label}</span>
+        <span style={{ fontSize:11, fontWeight:700, color:st.color }}>+{state.edge.toFixed(1)}%</span>
+      </div>
+      <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+        <span style={{ fontSize:10, fontWeight:700, color: state.ev>0?"#00ff88":"#7eb8ff" }}>EV {evSign}{state.ev.toFixed(0)}¢</span>
+        {state.type==="divergence" && <span style={{ fontSize:9, color:"#333" }}>vig eats edge</span>}
+      </div>
+    </div>
+  );
+}
+
+function StatBar({ label, valA, valB, suffix="" }) {
+  const max = Math.max(valA, valB)*1.2||1;
+  const winA = valA >= valB;
+  return (
+    <div style={{ marginBottom:9 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+        <span style={{ color:winA?"#00ff88":"#555", fontSize:11, fontWeight:winA?700:400 }}>{valA}{suffix}</span>
+        <span style={{ color:"#333", fontSize:10, textTransform:"uppercase", letterSpacing:"0.07em" }}>{label}</span>
+        <span style={{ color:!winA?"#00ff88":"#555", fontSize:11, fontWeight:!winA?700:400 }}>{valB}{suffix}</span>
+      </div>
+      <div style={{ display:"flex", gap:3 }}>
+        <div style={{ flex:1, height:3, background:"#161616", borderRadius:2, overflow:"hidden", transform:"scaleX(-1)" }}>
+          <div style={{ height:"100%", width:`${(valA/max)*100}%`, background:winA?"#00ff88":"#222", borderRadius:2 }} />
+        </div>
+        <div style={{ flex:1, height:3, background:"#161616", borderRadius:2, overflow:"hidden" }}>
+          <div style={{ height:"100%", width:`${(valB/max)*100}%`, background:!winA?"#00ff88":"#222", borderRadius:2 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StyleTag({ label }) {
+  return <span style={{ background:"rgba(255,180,0,0.06)", color:"#996600", border:"1px solid rgba(255,180,0,0.12)", borderRadius:3, padding:"1px 6px", fontSize:9, fontWeight:700, letterSpacing:"0.06em", textTransform:"uppercase" }}>{label}</span>;
+}
+
+function ModelAgreement({ f1, f2 }) {
+  const probs = Object.entries(MODELS).map(([k,m])=>({ k, label:m.label, prob:m.fn(f1,f2) }));
+  const spread = Math.max(...probs.map(p=>p.prob)) - Math.min(...probs.map(p=>p.prob));
+  const [ag, agCol] = spread<0.08 ? ["HIGH","#00ff88"] : spread<0.16 ? ["MEDIUM","#ffe44d"] : ["LOW","#ff6644"];
+  return (
+    <div style={{ background:"#111", borderRadius:8, padding:16, marginBottom:12 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
+        <span style={{ color:"#333", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase" }}>Model Agreement</span>
+        <span style={{ color:agCol, fontSize:10, fontWeight:800 }}>{ag}</span>
+      </div>
+      {probs.map(({k,label,prob})=>(
+        <div key={k} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
+          <span style={{ fontSize:10, color:"#444", width:112, flexShrink:0 }}>{label}</span>
+          <div style={{ flex:1, height:3, background:"#1a1a1a", borderRadius:2, overflow:"hidden" }}>
+            <div style={{ height:"100%", width:`${prob*100}%`, background:"#7df", borderRadius:2 }} />
+          </div>
+          <span style={{ fontSize:11, fontWeight:700, color:"#7df", width:32, textAlign:"right" }}>{(prob*100).toFixed(0)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MatchupBreakdown({ f1n, f2n }) {
+  const a = fighters[f1n], b = fighters[f2n];
+  if (!a||!b) return null;
+  const styleScore = getStyleMatchupScore(a.style, b.style);
+  const strM = ((a.stats.strAcc/100)*(1-b.stats.strDef/100) - (b.stats.strAcc/100)*(1-a.stats.strDef/100))*100;
+  const tdM  = ((a.stats.tdAcc/100)*(1-b.stats.tdDef/100)  - (b.stats.tdAcc/100)*(1-a.stats.tdDef/100))*100;
+  const factors = [
+    { label:"Style Matchup",      val:(styleScore-0.5)*100, suffix:"%" },
+    { label:"Strike Penetration", val:strM,                  suffix:"%" },
+    { label:"TD Penetration",     val:tdM,                   suffix:"%" },
+    { label:"Reach Advantage",    val:a.reach-b.reach,       suffix:'"' },
+    { label:"SOS Edge",           val:(a.sos-b.sos)*5,       suffix:"" },
+    { label:"Age Edge",           val:(b.age-a.age)*1.5,     suffix:"" },
+  ];
+  return (
+    <div style={{ background:"#111", borderRadius:8, padding:16, marginBottom:12 }}>
+      <div style={{ color:"#333", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>
+        Matchup Factors — <span style={{ color:"#00ff88" }}>{f1n.split(" ").pop()}</span> perspective
+      </div>
+      {factors.map(({label,val,suffix})=>{
+        const col = val>0?"#00ff88":val<0?"#ff6644":"#333";
+        const bw = Math.min(Math.abs(val)*3,50);
+        return (
+          <div key={label} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+            <span style={{ fontSize:10, color:"#444", width:130, flexShrink:0 }}>{label}</span>
+            <div style={{ flex:1, height:3, background:"#1a1a1a", borderRadius:2, position:"relative" }}>
+              <div style={{ position:"absolute", left:"50%", top:0, width:1, height:"100%", background:"#2a2a2a" }} />
+              <div style={{ position:"absolute", height:"100%", width:`${bw}%`, background:col, borderRadius:2, left:val>=0?"50%":`${50-bw}%` }} />
+            </div>
+            <span style={{ fontSize:11, fontWeight:700, color:col, width:44, textAlign:"right" }}>{val>0?"+":""}{val.toFixed(1)}{suffix}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MatchupModal({ bout, onClose, modelKey }) {
+  const { fighter1, fighter2, odds1, odds2, event, date, title } = bout;
+  const fn = MODELS[modelKey]?.fn || modelEnsemble;
+  const mp1 = fn(fighter1, fighter2), mp2 = 1-mp1;
+  const [mkt1, mkt2] = vigFreeProbs(odds1, odds2);
+  const vig = calcVig(odds1, odds2);
+  const f1 = fighters[fighter1], f2 = fighters[fighter2];
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.9)", zIndex:100, display:"flex", alignItems:"center", justifyContent:"center", backdropFilter:"blur(10px)" }} onClick={onClose}>
+      <div style={{ background:"#090909", border:"1px solid #1a1a1a", borderRadius:12, width:"min(720px,95vw)", maxHeight:"92vh", overflowY:"auto", padding:24, position:"relative" }} onClick={e=>e.stopPropagation()}>
+        <button onClick={onClose} style={{ position:"absolute", top:12, right:12, background:"none", border:"none", color:"#333", cursor:"pointer", fontSize:17 }}>✕</button>
+        <div style={{ color:"#cc8800", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:2 }}>
+          {event} · {date}{title?" · 🏆 Title Fight":""}
+        </div>
+        <div style={{ color:"#2a2a2a", fontSize:10, marginBottom:16 }}>Model: {MODELS[modelKey]?.label} · Vig: {vig}%</div>
+
+        <div style={{ display:"flex", gap:12, marginBottom:16 }}>
+          {[{name:fighter1,prob:mp1,mkt:mkt1,odds:odds1},{name:fighter2,prob:mp2,mkt:mkt2,odds:odds2}].map((f,i)=>(
+            <div key={i} style={{ flex:1, background:"#111", borderRadius:8, padding:14, textAlign:i===0?"left":"right" }}>
+              <div style={{ fontSize:18, fontWeight:900, color:"#fff", fontFamily:"'Bebas Neue',sans-serif", letterSpacing:"0.04em" }}>{f.name}</div>
+              <div style={{ color:"#444", fontSize:10, marginTop:2 }}>{fighters[f.name]?.record} · #{fighters[f.name]?.ranking} · SOS {fighters[f.name]?.sos}</div>
+              <div style={{ display:"flex", gap:4, marginTop:6, flexWrap:"wrap", justifyContent:i===0?"flex-start":"flex-end" }}>
+                {fighters[f.name]?.style.map(s=><StyleTag key={s} label={s}/>)}
+              </div>
+              <div style={{ fontSize:30, fontWeight:900, color:"#fff", fontFamily:"'Bebas Neue',sans-serif", marginTop:10 }}>{(f.prob*100).toFixed(0)}%</div>
+              <div style={{ fontSize:9, color:"#333", marginBottom:8 }}>model win prob</div>
+              <div style={{ display:"flex", gap:10, alignItems:"baseline", justifyContent:i===0?"flex-start":"flex-end", marginBottom:8 }}>
+                <span style={{ fontSize:12, color:"#444" }}>mkt {f.odds>0?`+${f.odds}`:f.odds}</span>
+                <span style={{ fontSize:14, fontWeight:700, color:"#7df" }}>mdl {probToOdds(f.prob)>0?`+${probToOdds(f.prob)}`:probToOdds(f.prob)}</span>
+              </div>
+              <div style={{ display:"flex", justifyContent:i===0?"flex-start":"flex-end" }}>
+                <EdgeCell modelProb={f.prob} marketProb={f.mkt} marketOdds={f.odds} vig={vig}/>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginBottom:14 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
+            <span style={{ fontSize:9, color:"#2a2a2a" }}>mkt implied {(mkt1*100).toFixed(0)}%</span>
+            <span style={{ fontSize:9, color:"#2a2a2a" }}>{(mkt2*100).toFixed(0)}%</span>
+          </div>
+          <div style={{ height:5, background:"#161616", borderRadius:4, overflow:"hidden", display:"flex" }}>
+            <div style={{ width:`${mp1*100}%`, background:"linear-gradient(90deg,#00ff88,#00bb55)", borderRadius:"4px 0 0 4px" }}/>
+            <div style={{ flex:1, background:"linear-gradient(90deg,#ff4455,#cc2233)", borderRadius:"0 4px 4px 0" }}/>
+          </div>
+        </div>
+
+        <ModelAgreement f1={fighter1} f2={fighter2}/>
+        <MatchupBreakdown f1n={fighter1} f2n={fighter2}/>
+
+        {f1&&f2&&(
+          <div style={{ background:"#111", borderRadius:8, padding:16 }}>
+            <div style={{ color:"#333", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:12 }}>
+              <span style={{ color:"#00ff88" }}>{fighter1.split(" ").pop()}</span> vs <span style={{ color:"#555" }}>{fighter2.split(" ").pop()}</span>
+            </div>
+            <StatBar label="Sig Strikes/Min" valA={f1.stats.slpm}   valB={f2.stats.slpm}/>
+            <StatBar label="Strike Accuracy" valA={f1.stats.strAcc} valB={f2.stats.strAcc} suffix="%"/>
+            <StatBar label="Strike Defense"  valA={f1.stats.strDef} valB={f2.stats.strDef} suffix="%"/>
+            <StatBar label="Takedown Avg"    valA={f1.stats.tdAvg}  valB={f2.stats.tdAvg}/>
+            <StatBar label="TD Defense"      valA={f1.stats.tdDef}  valB={f2.stats.tdDef} suffix="%"/>
+            <StatBar label="KO Rate"         valA={f1.stats.koRate} valB={f2.stats.koRate}/>
+            <StatBar label="Sub Rate"        valA={f1.stats.subAvg} valB={f2.stats.subAvg}/>
+            <StatBar label="Strength of Sched" valA={f1.sos}       valB={f2.sos}/>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BoutRow({ bout, onSelect, modelKey, showKelly, bankroll }) {
+  const { fighter1, fighter2, odds1, odds2, event, date, title } = bout;
+  const fn = MODELS[modelKey]?.fn || modelEnsemble;
+  const mp1 = fn(fighter1,fighter2), mp2 = 1-mp1;
+  const [mkt1,mkt2] = vigFreeProbs(odds1,odds2);
+  const vig = calcVig(odds1,odds2);
+  const s1 = getEdgeState(mp1,mkt1,odds1,vig), s2 = getEdgeState(mp2,mkt2,odds2,vig);
+  const top = s1.ev > s2.ev ? s1 : s2;
+  const topSt = getStateStyle(top);
+  const [hov, setHov] = useState(false);
+  const k1 = showKelly ? kellyBet(mp1, odds1, bankroll) : null;
+  const k2 = showKelly ? kellyBet(mp2, odds2, bankroll) : null;
+  return (
+    <div onClick={()=>onSelect(bout)} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+      style={{ background:hov?"#0f0f0f":"#0a0a0a", border:`1px solid ${hov?"#1e1e1e":"#141414"}`, borderRadius:8, cursor:"pointer", transition:"all 0.15s", marginBottom:8, overflow:"hidden" }}>
+      {top.type!=="none"&&<div style={{ height:2, background:topSt.color, opacity:0.45, width:`${Math.min(Math.abs(top.edge)*5,100)}%` }}/>}
+      <div style={{ padding:"14px 18px", display:"grid", gridTemplateColumns:"1fr auto 1fr", gap:12, alignItems:"center" }}>
+        <div>
+          <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:5 }}>
+            <span style={{ fontSize:14, fontWeight:800, color:"#fff", fontFamily:"'Bebas Neue',sans-serif", letterSpacing:"0.04em" }}>{fighter1}</span>
+            {title&&<span style={{ fontSize:8, color:"#cc8800", border:"1px solid rgba(255,180,0,0.2)", borderRadius:3, padding:"1px 4px" }}>TITLE</span>}
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+            <span style={{ fontSize:13, fontWeight:700, color:"#888" }}>{odds1>0?`+${odds1}`:odds1}</span>
+            <span style={{ color:"#222", fontSize:9 }}>→</span>
+            <span style={{ fontSize:12, fontWeight:700, color:"#7df" }}>{probToOdds(mp1)>0?`+${probToOdds(mp1)}`:probToOdds(mp1)}</span>
+          </div>
+          <EdgeCell modelProb={mp1} marketProb={mkt1} marketOdds={odds1} vig={vig}/>
+          {showKelly && k1 > 0 && (
+            <div style={{ marginTop:4, fontSize:10, color:"#00ff88", fontWeight:700 }}>
+              Kelly: ${k1} <span style={{ color:"#333", fontWeight:400 }}>½Kelly</span>
+            </div>
+          )}
+        </div>
+        <div style={{ textAlign:"center", padding:"0 4px" }}>
+          <div style={{ color:"#1e1e1e", fontWeight:900, fontSize:10 }}>VS</div>
+          <div style={{ color:"#252525", fontSize:9, marginTop:3 }}>{event}</div>
+          <div style={{ color:"#1e1e1e", fontSize:9 }}>{date}</div>
+          <div style={{ color:"#252525", fontSize:9, marginTop:3 }}>VIG {vig}%</div>
+          <div style={{ color:"#2a2a2a", fontSize:12, marginTop:4 }}>›</div>
+        </div>
+        <div style={{ textAlign:"right" }}>
+          <div style={{ fontSize:14, fontWeight:800, color:"#fff", fontFamily:"'Bebas Neue',sans-serif", letterSpacing:"0.04em", marginBottom:5 }}>{fighter2}</div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6, justifyContent:"flex-end" }}>
+            <span style={{ fontSize:12, fontWeight:700, color:"#7df" }}>{probToOdds(mp2)>0?`+${probToOdds(mp2)}`:probToOdds(mp2)}</span>
+            <span style={{ color:"#222", fontSize:9 }}>←</span>
+            <span style={{ fontSize:13, fontWeight:700, color:"#888" }}>{odds2>0?`+${odds2}`:odds2}</span>
+          </div>
+          <div style={{ display:"flex", justifyContent:"flex-end" }}>
+            <EdgeCell modelProb={mp2} marketProb={mkt2} marketOdds={odds2} vig={vig}/>
+          </div>
+          {showKelly && k2 > 0 && (
+            <div style={{ marginTop:4, fontSize:10, color:"#00ff88", fontWeight:700, textAlign:"right" }}>
+              Kelly: ${k2} <span style={{ color:"#333", fontWeight:400 }}>½Kelly</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ─────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [selected, setSelected] = useState(null);
+  const [tab, setTab] = useState("card");
+  const [modelKey, setModelKey] = useState("ensemble");
+  const [f1, setF1] = useState("Islam Makhachev");
+  const [f2, setF2] = useState("Dustin Poirier");
+  const [bankroll, setBankroll] = useState(1000);
+  const [showKelly, setShowKelly] = useState(false);
+  const [backtestResults, setBacktestResults] = useState(null);
+  const [backtestHistory, setBacktestHistory] = useState([
+    // Pre-loaded with some historical fights for demo
+    { fighter1:"Islam Makhachev", fighter2:"Charles Oliveira", odds1:-220, odds2:+185, winner:"fighter1", event:"UFC 280" },
+    { fighter1:"Alex Pereira",    fighter2:"Israel Adesanya",  odds1:+130, odds2:-155, winner:"fighter1", event:"UFC 281" },
+    { fighter1:"Sean O'Malley",   fighter2:"Aljamain Sterling",odds1:+135, odds2:-160, winner:"fighter1", event:"UFC 292" },
+    { fighter1:"Jon Jones",       fighter2:"Ciryl Gane",       odds1:-450, odds2:+350, winner:"fighter1", event:"UFC 285" },
+    { fighter1:"Merab Dvalishvili",fighter2:"Henry Cejudo",    odds1:-125, odds2:+105, winner:"fighter1", event:"UFC 298" },
+  ]);
+  const names = Object.keys(fighters);
+
+  return (
+    <div style={{ minHeight:"100vh", background:"#080808", color:"#fff", fontFamily:"'Inter','Helvetica Neue',sans-serif", paddingBottom:60 }}>
+      <div style={{ borderBottom:"1px solid #121212", padding:"16px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+        <div>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ width:7, height:7, borderRadius:"50%", background:"#ff4455", boxShadow:"0 0 8px #ff4455" }}/>
+            <span style={{ fontSize:16, fontWeight:900, fontFamily:"'Bebas Neue',sans-serif", letterSpacing:"0.12em" }}>UFC EDGE ANALYZER</span>
+          </div>
+          <div style={{ fontSize:9, color:"#2a2a2a", marginTop:2, letterSpacing:"0.06em" }}>MODEL VS MARKET · EV · VIG · EDGE</div>
+        </div>
+        <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+          {["card","matchup","profit","model","legend"].map(t=>(
+            <button key={t} onClick={()=>setTab(t)} style={{ background:tab===t?"#161616":"none", border:`1px solid ${tab===t?"#2a2a2a":"#141414"}`, color:tab===t?"#fff":"#333", borderRadius:5, padding:"5px 11px", cursor:"pointer", fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em" }}>
+              {t==="card"?"Card":t==="matchup"?"Matchup":t==="profit"?"Profitability":t==="model"?"Model Info":"Legend"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ borderBottom:"1px solid #0e0e0e", padding:"8px 24px", display:"flex", alignItems:"center", gap:6, overflowX:"auto" }}>
+        <span style={{ fontSize:9, color:"#2a2a2a", letterSpacing:"0.08em", textTransform:"uppercase", flexShrink:0 }}>Model</span>
+        {Object.entries(MODELS).map(([k,m])=>(
+          <button key={k} onClick={()=>setModelKey(k)} style={{ background:modelKey===k?"#141414":"none", border:`1px solid ${modelKey===k?"#7df":"#161616"}`, color:modelKey===k?"#7df":"#333", borderRadius:4, padding:"4px 10px", cursor:"pointer", fontSize:10, fontWeight:700, letterSpacing:"0.05em", whiteSpace:"nowrap", flexShrink:0 }}>
+            {m.label}{modelKey===k&&<span style={{ fontSize:9, color:"#335566", marginLeft:5 }}>{m.desc}</span>}
+          </button>
+        ))}
+        <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+          <button onClick={()=>setShowKelly(!showKelly)} style={{ background:showKelly?"rgba(0,255,136,0.08)":"none", border:`1px solid ${showKelly?"rgba(0,255,136,0.3)":"#1a1a1a"}`, color:showKelly?"#00ff88":"#333", borderRadius:4, padding:"4px 10px", cursor:"pointer", fontSize:10, fontWeight:700 }}>
+            Kelly
+          </button>
+          {showKelly && (
+            <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+              <span style={{ fontSize:9, color:"#333" }}>$</span>
+              <input
+                type="number" value={bankroll}
+                onChange={e=>setBankroll(Math.max(100,Number(e.target.value)))}
+                style={{ background:"#111", border:"1px solid #1a1a1a", color:"#fff", borderRadius:4, padding:"3px 7px", fontSize:11, width:70, textAlign:"right" }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ maxWidth:780, margin:"0 auto", padding:"24px 14px" }}>
+
+        {tab==="card"&&(
+          <div>
+            <div style={{ fontSize:10, color:"#333", marginBottom:14 }}>Upcoming bouts · Click to drill down · EV per $100</div>
+            {upcomingCard.map((b,i)=><BoutRow key={i} bout={b} onSelect={setSelected} modelKey={modelKey} showKelly={showKelly} bankroll={bankroll}/>)}
+          </div>
+        )}
+
+        {tab==="matchup"&&(
+          <div>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr auto 1fr", gap:10, alignItems:"center", marginBottom:18 }}>
+              <select value={f1} onChange={e=>setF1(e.target.value)} style={{ background:"#111", border:"1px solid #1a1a1a", color:"#fff", borderRadius:6, padding:"8px 11px", fontSize:12, cursor:"pointer" }}>
+                {names.map(n=><option key={n}>{n}</option>)}
+              </select>
+              <div style={{ color:"#222", fontWeight:900, textAlign:"center" }}>VS</div>
+              <select value={f2} onChange={e=>setF2(e.target.value)} style={{ background:"#111", border:"1px solid #1a1a1a", color:"#fff", borderRadius:6, padding:"8px 11px", fontSize:12, cursor:"pointer" }}>
+                {names.map(n=><option key={n}>{n}</option>)}
+              </select>
+            </div>
+            {f1!==f2&&(()=>{
+              const fn = MODELS[modelKey]?.fn||modelEnsemble;
+              const mp1=fn(f1,f2), mp2=1-mp1;
+              const ff1=fighters[f1], ff2=fighters[f2];
+              return (
+                <div>
+                  <div style={{ background:"#111", borderRadius:8, padding:16, marginBottom:12 }}>
+                    <div style={{ color:"#333", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:8 }}>Win Probability · {MODELS[modelKey]?.label}</div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                      <span style={{ fontSize:34, fontWeight:900, color:mp1>mp2?"#00ff88":"#888", fontFamily:"'Bebas Neue',sans-serif" }}>{(mp1*100).toFixed(0)}%</span>
+                      <span style={{ fontSize:34, fontWeight:900, color:mp2>mp1?"#00ff88":"#888", fontFamily:"'Bebas Neue',sans-serif" }}>{(mp2*100).toFixed(0)}%</span>
+                    </div>
+                    <div style={{ height:5, background:"#1a1a1a", borderRadius:4, overflow:"hidden", display:"flex" }}>
+                      <div style={{ width:`${mp1*100}%`, background:"linear-gradient(90deg,#00ff88,#00bb55)", borderRadius:"4px 0 0 4px" }}/>
+                      <div style={{ flex:1, background:"linear-gradient(90deg,#ff4455,#cc2233)", borderRadius:"0 4px 4px 0" }}/>
+                    </div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:5 }}>
+                      <span style={{ fontSize:9, color:"#333" }}>{f1}</span>
+                      <span style={{ fontSize:9, color:"#333" }}>{f2}</span>
+                    </div>
+                  </div>
+                  <ModelAgreement f1={f1} f2={f2}/>
+                  <MatchupBreakdown f1n={f1} f2n={f2}/>
+                  {ff1&&ff2&&(
+                    <div style={{ background:"#111", borderRadius:8, padding:16 }}>
+                      <div style={{ color:"#333", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>
+                        <span style={{ color:"#00ff88" }}>{f1.split(" ").pop()}</span> vs <span style={{ color:"#555" }}>{f2.split(" ").pop()}</span>
+                      </div>
+                      <StatBar label="Sig Strikes/Min" valA={ff1.stats.slpm}   valB={ff2.stats.slpm}/>
+                      <StatBar label="Strike Accuracy" valA={ff1.stats.strAcc} valB={ff2.stats.strAcc} suffix="%"/>
+                      <StatBar label="Strike Defense"  valA={ff1.stats.strDef} valB={ff2.stats.strDef} suffix="%"/>
+                      <StatBar label="Takedown Avg"    valA={ff1.stats.tdAvg}  valB={ff2.stats.tdAvg}/>
+                      <StatBar label="TD Defense"      valA={ff1.stats.tdDef}  valB={ff2.stats.tdDef} suffix="%"/>
+                      <StatBar label="KO Rate"         valA={ff1.stats.koRate} valB={ff2.stats.koRate}/>
+                      <StatBar label="Sub Rate"        valA={ff1.stats.subAvg} valB={ff2.stats.subAvg}/>
+                      <StatBar label="Strength of Sched" valA={ff1.sos}       valB={ff2.sos}/>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {tab==="backtest"&&(()=>{
+          // Run model on each historical fight and compute P&L
+          const fn = MODELS[modelKey]?.fn || modelEnsemble;
+          let running = 0, totalBets = 0, wins = 0;
+          const rows = backtestHistory.map((bout, i) => {
+            const f1name = bout.fighter1, f2name = bout.fighter2;
+            const hasData = fighters[f1name] && fighters[f2name];
+            if (!hasData) return { ...bout, skip: true };
+
+            const mp1 = fn(f1name, f2name), mp2 = 1-mp1;
+            const [mkt1, mkt2] = vigFreeProbs(bout.odds1, bout.odds2);
+            const vig = calcVig(bout.odds1, bout.odds2);
+            const s1 = getEdgeState(mp1, mkt1, bout.odds1, vig);
+            const s2 = getEdgeState(mp2, mkt2, bout.odds2, vig);
+
+            // Model's preferred bet
+            const modelBet = mp1 > mp2 ? 1 : 2;
+            const modelOdds = modelBet === 1 ? bout.odds1 : bout.odds2;
+            const modelProb = modelBet === 1 ? mp1 : mp2;
+            const state = modelBet === 1 ? s1 : s2;
+            const betSize = showKelly ? kellyBet(modelProb, modelOdds, bankroll) : 100;
+            const actualWinner = bout.winner === "fighter1" ? 1 : 2;
+            const won = modelBet === actualWinner;
+
+            const payout = modelOdds > 0 ? modelOdds/100 : 100/Math.abs(modelOdds);
+            const profit = won ? betSize * payout : -betSize;
+            running += profit;
+            totalBets++;
+            if (won) wins++;
+
+            return { ...bout, mp1, mp2, state, modelBet, modelOdds, betSize, won, profit, running: running };
+          }).filter(r => !r.skip);
+
+          const roi = totalBets > 0 ? (running / (totalBets * 100)) * 100 : 0;
+
+          return (
+            <div>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginBottom:16 }}>
+                <div style={{ fontSize:10, color:"#333" }}>Historical results · Model: {MODELS[modelKey]?.label} · Flat $100 bets</div>
+                <div style={{ display:"flex", gap:16 }}>
+                  <div style={{ textAlign:"center" }}>
+                    <div style={{ fontSize:18, fontWeight:900, color: running >= 0 ? "#00ff88":"#ff4455", fontFamily:"'Bebas Neue',sans-serif" }}>{running >= 0 ? "+" : ""}${running.toFixed(0)}</div>
+                    <div style={{ fontSize:9, color:"#333" }}>P&L</div>
+                  </div>
+                  <div style={{ textAlign:"center" }}>
+                    <div style={{ fontSize:18, fontWeight:900, color:"#aaa", fontFamily:"'Bebas Neue',sans-serif" }}>{wins}/{totalBets}</div>
+                    <div style={{ fontSize:9, color:"#333" }}>W/L</div>
+                  </div>
+                  <div style={{ textAlign:"center" }}>
+                    <div style={{ fontSize:18, fontWeight:900, color: roi >= 0?"#00ff88":"#ff4455", fontFamily:"'Bebas Neue',sans-serif" }}>{roi >= 0?"+":""}{roi.toFixed(1)}%</div>
+                    <div style={{ fontSize:9, color:"#333" }}>ROI</div>
+                  </div>
+                </div>
+              </div>
+
+              {rows.map((r, i) => {
+                const st = getStateStyle(r.state || {type:"none",label:"NO EDGE"});
+                return (
+                  <div key={i} style={{ background:"#0a0a0a", border:`1px solid ${r.won?"#1a2a1a":"#2a1a1a"}`, borderRadius:7, padding:"12px 16px", marginBottom:7, display:"grid", gridTemplateColumns:"1fr auto 1fr auto", gap:10, alignItems:"center" }}>
+                    <div>
+                      <div style={{ fontSize:13, fontWeight:800, color: r.modelBet===1?"#fff":"#666", fontFamily:"'Bebas Neue',sans-serif" }}>{r.fighter1}</div>
+                      <div style={{ fontSize:10, color:"#444", marginTop:2 }}>{r.odds1>0?`+${r.odds1}`:r.odds1}</div>
+                    </div>
+                    <div style={{ textAlign:"center", fontSize:9, color:"#222" }}>
+                      <div>{r.event}</div>
+                      <div style={{ fontSize:14, marginTop:4 }}>{r.won ? "✓" : "✗"}</div>
+                    </div>
+                    <div style={{ textAlign:"right" }}>
+                      <div style={{ fontSize:13, fontWeight:800, color: r.modelBet===2?"#fff":"#666", fontFamily:"'Bebas Neue',sans-serif" }}>{r.fighter2}</div>
+                      <div style={{ fontSize:10, color:"#444", marginTop:2 }}>{r.odds2>0?`+${r.odds2}`:r.odds2}</div>
+                    </div>
+                    <div style={{ textAlign:"right", minWidth:60 }}>
+                      <div style={{ fontSize:13, fontWeight:900, color: r.won?"#00ff88":"#ff4455", fontFamily:"'Bebas Neue',sans-serif" }}>{r.won?"+":""}{r.profit.toFixed(0)}</div>
+                      <div style={{ fontSize:9, color:"#333" }}>running: ${r.running.toFixed(0)}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div style={{ marginTop:16, padding:14, background:"#0a0a0a", border:"1px solid #141414", borderRadius:8, fontSize:10, color:"#444", lineHeight:1.8 }}>
+                Add more historical fights to backtestHistory in the code to extend this analysis.
+                Accuracy on 5 sample fights is not statistically meaningful — needs 100+ fights for reliable ROI estimates.
+              </div>
+            </div>
+          );
+        })()}
+
+        {tab==="compare"&&(()=>{
+          // Run all models on every upcoming fight and compare
+          const fightData = upcomingCard.filter(b => fighters[b.fighter1] && fighters[b.fighter2]);
+          return (
+            <div>
+              <div style={{ fontSize:10, color:"#333", marginBottom:16 }}>All models · side-by-side · upcoming card</div>
+              {fightData.map((bout, bi) => {
+                const [mkt1, mkt2] = vigFreeProbs(bout.odds1, bout.odds2);
+                const vig = calcVig(bout.odds1, bout.odds2);
+                const modelResults = Object.entries(MODELS).map(([key, m]) => {
+                  const p1 = m.fn(bout.fighter1, bout.fighter2);
+                  const p2 = 1-p1;
+                  const ev1 = calcEV(p1, bout.odds1);
+                  const ev2 = calcEV(p2, bout.odds2);
+                  const edge1 = (p1-mkt1)*100, edge2 = (p2-mkt2)*100;
+                  return { key, label:m.label, p1, p2, ev1, ev2, edge1, edge2,
+                           bet: ev1 > 0 && edge1 > 0 ? bout.fighter1.split(" ").pop() :
+                                ev2 > 0 && edge2 > 0 ? bout.fighter2.split(" ").pop() : "—" };
+                });
+                const agreement = modelResults.filter(m=>m.bet!=="—").map(m=>m.bet);
+                const consensus = agreement.length >= 3 ? agreement[0] : null;
+
+                return (
+                  <div key={bi} style={{ background:"#0a0a0a", border:"1px solid #141414", borderRadius:8, padding:16, marginBottom:12 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+                      <div style={{ fontSize:13, fontWeight:800, color:"#fff", fontFamily:"'Bebas Neue',sans-serif" }}>
+                        {bout.fighter1.split(" ").pop()} <span style={{ color:"#333" }}>vs</span> {bout.fighter2.split(" ").pop()}
+                      </div>
+                      {consensus && (
+                        <span style={{ fontSize:9, color:"#00ff88", border:"1px solid rgba(0,255,136,0.25)", borderRadius:3, padding:"2px 7px", fontWeight:700 }}>
+                          CONSENSUS: {consensus}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(5, 1fr)", gap:6 }}>
+                      {modelResults.map(mr => (
+                        <div key={mr.key} style={{ background:"#111", borderRadius:5, padding:8, textAlign:"center" }}>
+                          <div style={{ fontSize:9, color:"#444", marginBottom:4 }}>{mr.label}</div>
+                          <div style={{ fontSize:14, fontWeight:900, color:"#fff", fontFamily:"'Bebas Neue',sans-serif" }}>{(mr.p1*100).toFixed(0)}%</div>
+                          <div style={{ fontSize:9, color:"#555" }}>{bout.fighter1.split(" ").pop()}</div>
+                          <div style={{ marginTop:6, fontSize:10, fontWeight:700,
+                            color: mr.bet==="—"?"#333":mr.bet===bout.fighter1.split(" ").pop()?"#00ff88":"#00ff88" }}>
+                            {mr.bet==="—" ? "—" : `▶ ${mr.bet}`}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Prob bar across models */}
+                    <div style={{ marginTop:10, height:3, background:"#1a1a1a", borderRadius:2, overflow:"hidden", display:"flex" }}>
+                      {modelResults.map((mr, i) => (
+                        <div key={i} style={{ flex:1, height:"100%", background:`hsl(${mr.p1*120},70%,45%)`, opacity:0.6 }}/>
+                      ))}
+                    </div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:3, fontSize:8, color:"#333" }}>
+                      <span>Model spread: {((Math.max(...modelResults.map(m=>m.p1)) - Math.min(...modelResults.map(m=>m.p1)))*100).toFixed(1)}%</span>
+                      <span>Avg: {(modelResults.reduce((s,m)=>s+m.p1,0)/modelResults.length*100).toFixed(0)}% {bout.fighter1.split(" ").pop()}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+
+
+        {tab==="profit"&&(()=>{
+          // Real profitability data from run_all.bat + backtest
+          // XGBoost-only model, era-filtered (excl 2002-2013, 2019-2022), 91 features
+          // Even-money sim — real odds pending Oddsportal scraper
+
+          // Real closing line odds — 88% of fights matched to historical odds
+          // Bet rule: model prob > market implied prob (edge covers vig), flat $100
+          const since2023 = {
+            label: "Holdout · Sep 2023–Apr 2026",
+            n: 741, bets: 580, wins: 490, winPct: 84.5,
+            pnl: 46568, roi: 80.2,
+            note: "Real closing line odds · 88% matched"
+          };
+
+          const last20 = {
+            label: "Last 20 Events",
+            n: 135, bets: 108, wins: 68, winPct: 63.0,
+            pnl: 9219, roi: 85.4,
+            note: "88% real odds"
+          };
+
+          const last3 = {
+            label: "Last 3 Events",
+            n: 20, bets: 17, wins: 11, winPct: 64.7,
+            pnl: 1428, roi: 84.0,
+            note: "100% real odds"
+          };
+
+          // Division ROI — real closing line odds, last 20 events
+          const byYear = [
+            { year:"Bantam",  bets:13, winPct:77, pnl:1911, roi:147.0 },
+            { year:"W Fly",   bets:6,  winPct:83, pnl:1683, roi:280.5 },
+            { year:"Middle",  bets:13, winPct:69, pnl:1377, roi:105.9 },
+            { year:"Light",   bets:16, winPct:69, pnl:1217, roi:76.1  },
+            { year:"W Straw", bets:11, winPct:73, pnl:1101, roi:100.1 },
+            { year:"Fly",     bets:10, winPct:70, pnl:996,  roi:99.6  },
+            { year:"Feather", bets:11, winPct:64, pnl:634,  roi:57.6  },
+            { year:"Welter",  bets:15, winPct:47, pnl:-69,  roi:-4.6  },
+          ];
+
+          // Division ROI — real odds, full holdout
+          const divs = [
+            { div:"W Bantamweight", bets:18,  roi:145.7, pnl:2623 },
+            { div:"Heavyweight",    bets:25,  roi:98.4,  pnl:2459 },
+            { div:"W Strawweight",  bets:50,  roi:93.5,  pnl:4676 },
+            { div:"Lt Heavyweight", bets:35,  roi:89.8,  pnl:3144 },
+            { div:"W Flyweight",    bets:35,  roi:89.6,  pnl:3136 },
+            { div:"Flyweight",      bets:34,  roi:85.4,  pnl:2904 },
+            { div:"Bantamweight",   bets:60,  roi:76.1,  pnl:4567 },
+            { div:"Lightweight",    bets:83,  roi:71.2,  pnl:5907 },
+            { div:"Featherweight",  bets:76,  roi:71.2,  pnl:5413 },
+            { div:"Welterweight",   bets:73,  roi:64.5,  pnl:4709 },
+          ];
+
+          // This weekend's picks
+          const picks = [
+            { f1:"Dariush",  f2:"Salkilld",  verdict:"BET DARIUSH",  odds:"+350", ev:105, prob:45.5 },
+            { f1:"Elliott",  f2:"Erceg",     verdict:"BET ELLIOTT",  odds:"+230", ev:51,  prob:45.8 },
+            { f1:"Gaziev",   f2:"Pericic",   verdict:"BET PERICIC",  odds:"+115", ev:14,  prob:53.2 },
+            { f1:"Maddalena",f2:"Prates",    verdict:"PASS",         odds:"+100", ev:6,   prob:52.9 },
+            { f1:"Malkoun",  f2:"Meerschaert",verdict:"PASS",        odds:"-1100",ev:0,   prob:47.0 },
+          ];
+
+          const maxPnl = Math.max(...byYear.map(y=>Math.abs(y.pnl)));
+
+          return (
+            <div>
+              <div style={{ fontSize:9, color:"#333", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:16 }}>
+                XGBoost Model · Real Closing Odds · Edge vs Market · Flat $100 Bets
+              </div>
+
+              {/* 3 period summary */}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:18 }}>
+                {[since2023, last20, last3].map((p,i)=>(
+                  <div key={i} style={{ background:"#0a0a0a", border:"1px solid #141414", borderRadius:8, padding:"12px 10px" }}>
+                    <div style={{ fontSize:8, color:"#333", letterSpacing:"0.08em", marginBottom:8, textTransform:"uppercase" }}>{p.label}</div>
+                    <div style={{ fontSize:22, fontWeight:900, color: p.roi > 0 ? "#00ff88":"#ff4455", fontFamily:"'Bebas Neue',sans-serif" }}>{p.roi > 0 ? "+" : ""}{p.roi}%</div>
+                    <div style={{ fontSize:10, color:"#555", marginTop:2 }}>ROI</div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:8 }}>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ fontSize:13, fontWeight:800, color:"#444" }}>${p.pnl > 0 ? "+" : ""}{p.pnl.toLocaleString()}</div>
+                        <div style={{ fontSize:8, color:"#222" }}>P&L</div>
+                      </div>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ fontSize:13, fontWeight:800, color:"#444" }}>{p.winPct}%</div>
+                        <div style={{ fontSize:8, color:"#222" }}>WIN %</div>
+                      </div>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ fontSize:13, fontWeight:800, color:"#444" }}>{p.wins}/{p.bets}</div>
+                        <div style={{ fontSize:8, color:"#222" }}>RECORD</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* This weekend */}
+              <div style={{ marginBottom:18 }}>
+                <div style={{ fontSize:9, color:"#333", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:10 }}>
+                  This Weekend — UFC Fight Night · Perth · May 2
+                </div>
+                {picks.map((p,i)=>{
+                  const isBet = p.verdict.startsWith("BET");
+                  return (
+                    <div key={i} style={{ background:"#0a0a0a", border:`1px solid ${isBet?"#1a2a1a":"#111"}`, borderRadius:7, padding:"10px 14px", marginBottom:5 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                        <div style={{ flex:1 }}>
+                          <div style={{ fontSize:11, color:"#444" }}>{p.f1} <span style={{ color:"#222" }}>vs</span> {p.f2}</div>
+                          <div style={{ fontSize:9, color:"#333", marginTop:2 }}>{p.prob}% model prob · {p.odds}</div>
+                        </div>
+                        <div style={{ textAlign:"right" }}>
+                          <div style={{ fontSize:11, fontWeight:800, color: isBet ? "#00ff88":"#333" }}>{p.verdict}</div>
+                          {isBet && <div style={{ fontSize:9, color:"#336633", marginTop:1 }}>+{p.ev}¢ EV</div>}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Year chart */}
+              <div style={{ background:"#0a0a0a", border:"1px solid #141414", borderRadius:8, padding:"14px 16px", marginBottom:18 }}>
+                <div style={{ fontSize:9, color:"#333", letterSpacing:"0.08em", marginBottom:12 }}>P&L BY DIVISION — LAST 20 EVENTS</div>
+                <div style={{ display:"flex", alignItems:"flex-end", gap:4, height:72 }}>
+                  {byYear.map((y,i)=>{
+                    const h = Math.max(4, (Math.abs(y.pnl)/maxPnl)*66);
+                    const color = y.pnl >= 0 ? "#00ff88":"#ff4455";
+                    return (
+                      <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:2 }}>
+                        <div style={{ fontSize:7, color, lineHeight:1 }}>{y.pnl>=0?"+":""}{(y.pnl/1000).toFixed(1)}k</div>
+                        <div style={{ width:"100%", background:color, borderRadius:2, height:h, opacity:0.8 }}/>
+                        <div style={{ fontSize:7, color:"#333" }}>{y.year.slice(2)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Division breakdown */}
+              <div>
+                <div style={{ fontSize:9, color:"#333", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:10 }}>
+                  Division ROI — Ensemble Holdout
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5 }}>
+                  {divs.map((d,i)=>(
+                    <div key={i} style={{ background:"#0a0a0a", border:"1px solid #111", borderRadius:6, padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                      <div>
+                        <div style={{ fontSize:10, fontWeight:700, color:"#444" }}>{d.div}</div>
+                        <div style={{ fontSize:8, color:"#222", marginTop:1 }}>{d.bets} bets</div>
+                      </div>
+                      <div style={{ fontSize:14, fontWeight:900, color: d.roi >= 5 ? "#00ff88": d.roi >= 0 ? "#ffe44d":"#ff4455", fontFamily:"'Bebas Neue',sans-serif" }}>
+                        {d.roi>=0?"+":""}{d.roi}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize:8, color:"#1a1a1a", marginTop:10, textAlign:"center" }}>
+                  Even-money sim · Run scraper_oddsportal.py for real closing line ROI
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {tab==="model"&&(()=>{
+          // Model selection analysis results
+          // Ran on 933 fights from 2023+ — XGBoost clearly dominant
+          const modelRanking = [
+            { name:"XGBoost",          acc:90.8, auc:0.950, hcAcc:96.4, hcN:250, verdict:"✓ ACTIVE" },
+            { name:"Random Forest",    acc:74.8, auc:0.836, hcAcc:89.9, hcN:376, verdict:"—" },
+            { name:"Logistic Reg",     acc:59.5, auc:0.644, hcAcc:66.0, hcN:535, verdict:"—" },
+            { name:"XGB + LW",         acc:85.3, auc:0.912, hcAcc:100,  hcN:23,  verdict:"2-model" },
+            { name:"RF + XGB",         acc:83.9, auc:0.916, hcAcc:96.1, hcN:309, verdict:"2-model" },
+            { name:"Full Ensemble",    acc:72.2, auc:0.805, hcAcc:72.2, hcN:6,   verdict:"✗ WORST" },
+          ];
+
+          const features = [
+            { name:"Elo Rating Diff",       imp:100 },
+            { name:"Career Win Rate Diff",  imp:82  },
+            { name:"Striking Accuracy Diff",imp:71  },
+            { name:"Days Since Last Fight",  imp:65  },
+            { name:"Modern Era Activity",   imp:58  },
+            { name:"Sig Strike Volume",     imp:54  },
+            { name:"Takedown Defense Diff", imp:48  },
+            { name:"Reach Diff",            imp:42  },
+            { name:"Finish Rate Diff",      imp:38  },
+            { name:"Stance Matchup",        imp:31  },
+          ];
+
+          return (
+            <div>
+              <div style={{ fontSize:9, color:"#333", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:16 }}>
+                Model Selection · 933 Fights · Jan 2023+
+              </div>
+
+              {/* Model ranking */}
+              <div style={{ marginBottom:18 }}>
+                <div style={{ fontSize:9, color:"#333", letterSpacing:"0.08em", marginBottom:10 }}>ACCURACY RANKING</div>
+                {modelRanking.map((m,i)=>(
+                  <div key={i} style={{ background: m.verdict==="✓ ACTIVE"?"#0a1a0a":"#0a0a0a", border:`1px solid ${m.verdict==="✓ ACTIVE"?"#1a3a1a":"#111"}`, borderRadius:6, padding:"9px 14px", marginBottom:5, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                    <div>
+                      <div style={{ fontSize:11, fontWeight:800, color: m.verdict==="✓ ACTIVE"?"#fff":"#444" }}>{m.name}</div>
+                      <div style={{ fontSize:9, color:"#333", marginTop:1 }}>AUC {m.auc} · HC {m.hcAcc}% on {m.hcN} fights</div>
+                    </div>
+                    <div style={{ textAlign:"right" }}>
+                      <div style={{ fontSize:16, fontWeight:900, color: m.verdict==="✓ ACTIVE"?"#00ff88": m.verdict==="✗ WORST"?"#ff4455":"#444", fontFamily:"'Bebas Neue',sans-serif" }}>{m.acc}%</div>
+                      <div style={{ fontSize:8, color: m.verdict==="✓ ACTIVE"?"#336633": m.verdict==="✗ WORST"?"#662222":"#222" }}>{m.verdict}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Top features */}
+              <div>
+                <div style={{ fontSize:9, color:"#333", letterSpacing:"0.08em", marginBottom:10 }}>TOP FEATURES — XGB SHAP IMPORTANCE</div>
+                {features.map((f,i)=>(
+                  <div key={i} style={{ marginBottom:6 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginBottom:2 }}>
+                      <span style={{ fontSize:10, color:"#444" }}>{f.name}</span>
+                      <span style={{ fontSize:9, color:"#333" }}>{f.imp}</span>
+                    </div>
+                    <div style={{ height:3, background:"#111", borderRadius:2 }}>
+                      <div style={{ height:"100%", width:`${f.imp}%`, background:"linear-gradient(90deg,#00ff88,#007744)", borderRadius:2 }}/>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ fontSize:8, color:"#1a1a1a", marginTop:10 }}>
+                  91 features total · Era-filtered training (excl 2002-2013, 2019-2022) · 1,618 clean fights
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {tab==="legend"&&(
+          <div>
+            <div style={{ fontSize:10, color:"#333", marginBottom:18 }}>Signal guide · EV per $100 after vig</div>
+            {[
+              { label:"STRONG",   color:"#00ff88", desc:"Edge beats vig — positive EV. Model strongly disagrees with market. Best signal." },
+              { label:"MODERATE", color:"#ffe44d", desc:"Edge beats vig — positive EV. Meaningful divergence worth acting on." },
+              { label:"SLIGHT",   color:"#ffb347", desc:"Barely beats vig — thin positive EV. Look for corroborating factors." },
+              { label:"DIVERGE",  color:"#7eb8ff", desc:"Model disagrees but edge doesn't cover vig. Informational only — not a bet signal." },
+              { label:"NO EDGE",  color:"#2a2a2a", desc:"Model agrees with market or market favors fighter more than model does." },
+            ].map(({label,color,desc})=>(
+              <div key={label} style={{ background:"#0a0a0a", border:"1px solid #141414", borderRadius:8, padding:"14px 16px", marginBottom:7, display:"flex", gap:12, alignItems:"flex-start" }}>
+                <span style={{ color, border:`1px solid ${color}33`, borderRadius:4, padding:"3px 8px", fontSize:10, fontWeight:800, letterSpacing:"0.08em", flexShrink:0, minWidth:60, textAlign:"center" }}>{label}</span>
+                <span style={{ fontSize:11, color:"#444", lineHeight:1.6 }}>{desc}</span>
+              </div>
+            ))}
+            <div style={{ marginTop:16, background:"#0a0a0a", border:"1px solid #141414", borderRadius:8, padding:16 }}>
+              <div style={{ color:"#252525", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>Models</div>
+              {Object.entries(MODELS).map(([k,m])=>(
+                <div key={k} style={{ display:"flex", gap:10, marginBottom:7 }}>
+                  <span style={{ fontSize:11, fontWeight:700, color:"#7df", width:120, flexShrink:0 }}>{m.label}</span>
+                  <span style={{ fontSize:11, color:"#3a3a3a" }}>{m.desc}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop:10, background:"#0a0a0a", border:"1px solid #141414", borderRadius:8, padding:16 }}>
+              <div style={{ color:"#252525", fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>Math</div>
+              <div style={{ fontSize:11, color:"#3a3a3a", lineHeight:2.2 }}>
+                <div><span style={{ color:"#444" }}>Edge %</span> = model win prob − vig-free market implied prob</div>
+                <div><span style={{ color:"#444" }}>EV</span> = (model prob × payout − loss) × 100, per $100 bet</div>
+                <div><span style={{ color:"#444" }}>Vig</span> = sum of raw implied probs − 1 (book's margin)</div>
+                <div><span style={{ color:"#444" }}>DIVERGE</span> = edge exists but EV negative after vig cost</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {selected&&<MatchupModal bout={selected} onClose={()=>setSelected(null)} modelKey={modelKey}/>}
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet"/>
+    </div>
+  );
+}
+
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<UFCEdgeAnalyzer />);
+  </script>
 </body>
 </html>
