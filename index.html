@@ -442,6 +442,8 @@ function updateVerdict(id) {
 
   if (betOdds > 200 && edge >= 25) {
     verdict = 'Disrespected Dog - Bet ' + betOn; cssClass = 'osl-verdict verdict-dog';
+  } else if (betOdds > 200) {
+    verdict = 'No Edge at These Odds'; cssClass = 'osl-verdict verdict-pass';
   } else if (betOdds >= -200 && edge >= 4) {
     verdict = 'Model Loves It - Bet ' + betOn; cssClass = 'osl-verdict verdict-loves';
   } else if (edge > 0) {
